@@ -1,0 +1,5 @@
+﻿Original GM TC ID,TEST STEPS
+TC_MFL_000000_GAS_Google_Assistant_0001,"1. say ""hey Google""
+2. say ""call Frank"""
+TC_MFL_000000_GAS_Google_Assistant_0002,"1. say ""hey Google""
+2. say ""call startbucks"""
