@@ -1,10 +1,3 @@
-from gtts import gTTS 
-import os
-
-text = "Hey google, Call Frank"
-language = 'en'
-speech = gTTS(text = text, lang = language, slow = True)
-
-speech.save('text.mp3')
-
-os.system("start text.mp3")
+import speech_recognition as sr
+for index, name in enumerate(sr.Microphone.list_microphone_names()):
+    print("Microphone with name \"{1}\" found for `Microphone(device_index={0})`".format(index, name))
