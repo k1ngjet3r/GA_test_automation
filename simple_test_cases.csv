@@ -1,5 +1,5 @@
 ﻿Original GM TC ID,TEST STEPS
 TC_MFL_000000_GAS_Google_Assistant_0001,"1. say ""hey Google""
-2. say ""play music"""
+2. say ""turn down the volume"""
 TC_MFL_000000_GAS_Google_Assistant_0002,"1. say ""hey Google""
-2. say ""search near by startbucks"""
+2. say ""play music"""
