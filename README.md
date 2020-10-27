@@ -11,4 +11,6 @@ Once we have the CSV. file, the steps are then converted into speech by using py
 In this part, the response need to be convert into the text. Here we are using the speech_recognition library and gtts (Google text-to-speech) engine to convert the speech to text.
 
 ## 3. Determine the results
-After we collect the respond from the Google Assisatant, we need to determine the results is vaild or not. This part is the most difficult part since the google assistant respond are different for different input. The only way I come up with is the fail cases, if the respond start with "sorry", this is the sign for Google assistant state that it cannot execute the command. But the hardest part is to determine the right respond and wether the command is block or not. This part is the part that need to be explored further more.
+After we collect the respond from the Google Assisatant, we need to determine the results is vaild or not. This part is the most difficult part since the google assistant respond are different for different input. The only way I come up with is the fail cases, if the respond start with "sorry", this is the sign for Google assistant state that it cannot execute the command. But the hardest part is to determine the right respond and wether the command is block or not. This is the part that need to be explored furthermore.
+
+This project is paused since other team was already working on this part accroding to Rick. I might come back in the future for integrading this with other project.
