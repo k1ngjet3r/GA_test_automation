@@ -1,4 +1,5 @@
-import csv
+from openpyxl import load_workbook
+from openpyxl import Workbook
 import pyttsx3
 import time
 import speech_recognition as sr
@@ -9,6 +10,12 @@ import os
 #setup the speech_recognition
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
+
+class Bot():
+    def __init__(self, input_file, output_file):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.sheet = load_workbook(self.input_file).active
 
 #defining the speech to tex function and adjust the sensitivity of ambient noise
 #and record audio from mic
@@ -65,28 +72,13 @@ engine = pyttsx3.init()
 rate = engine.getProperty('rate')
 engine.setProperty('rate', 120)
 
-#convert the text cases in to speech
-with open('simple_test_cases.csv', 'r') as file:
-    reader = csv.reader(file)
-    for row in reader:
-        tts = []
-        name, steps = row
-        print("running test case: {0}".format(name))
-
-        #for test case involved with 'hey google' activation
-        if '\n' in steps:
-            steps = steps.split('\n')
-
-            speech = steps[0][6:] + ", " + steps[1][6:]
-            pyttsx3_speak(speech)
-
-
-            # #say "hey google" first and than say the command with 0.5 second delay
-            # engine.say(steps[0][6:])
-            # engine.runAndWait()
-            # time.sleep(0.5)
-            # engine.say(steps[1][6:])
-            # engine.runAndWait()
+def tts(file):
+    #say "hey google" first and than say the command with 0.5 second delay
+    engine.say(steps[0][6:])
+    engine.runAndWait()
+    time.sleep(0.5)
+    engine.say(steps[1][6:])
+    engine.runAndWait()
             
             response = stt(r, mic)
             print(response)

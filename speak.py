@@ -6,7 +6,10 @@ from gtts import gTTS
 import os
 
 engine = pyttsx3.init()
-rate = engine.getProperty('rate')
+# rate = engine.getProperty('rate')
 engine.setProperty('rate', 120)
-engine.say("ok google")
+engine.say("hello world")
+time.sleep(1)
+engine.runAndWait()
+engine.say('test')
 engine.runAndWait()
