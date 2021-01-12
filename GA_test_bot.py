@@ -18,7 +18,7 @@ def stt(recognizer, microphone):
         audio = recognizer.listen(source, timeout= 300)
     
     response = {'success': True, "error": None, "transcription": None}
-    print('Collecting Respond...')
+    # print('Collecting Respond...')
     try:
         recog = recognizer.recognize_google(audio, language='en-US')
         response["transcription"] = recog
@@ -28,9 +28,11 @@ def stt(recognizer, microphone):
         response['error'] = 'API unavailable'
 
     except sr.UnknownValueError:
+        response['success'] = False
         response['error'] = "Unable to recognitized the speech"
 
     except:
+        response['success'] = False
         response['error']  = 'No respond from Google Assistant'
     return response
 
@@ -108,20 +110,40 @@ class Automation():
             tts(cases[tcid])
 
             # Reciving Respond
+            print('Collecting Respond...')
             respond = stt(r, mic)
             print("Respond: {}".format(str(respond['transcription'])))
 
             # Capturing the image
-            capturing(tcid)
+            if respond['transcription'] is not None:
+                capturing(tcid)
+            
+            else:
+                # give it 5 sec to clear the previous condition
+                time.sleep(5)
+                # Try to perform the test case again
+                print('Try to perform the case again')
+                tts(cases[tcid])
+                # Reciving Respond
+                print('Collecting Respond...')
+                respond = stt(r, mic)
+                print("Respond: {}".format(str(respond['transcription'])))
+
+                if respond['transcription'] is not None:
+                    capturing(tcid)
+                else:
+                    print('Fail to perform the test case {}'.format(tcid))
 
             result.append(str(respond['transcription']))
             self.wb['AutoResult'].append(result)
+            print(respond)
             print('====================================================')
+            time.sleep(5)
 
         push_noti('All test cases executed.')
         # Export the result
         print('Saving the file {}'.format(self.output_file))
         self.wb.save(self.output_file)
 
-test = Automation('ac_online_signin.xlsx', 'ac_online_signin_Result.xlsx')
+test = Automation('ac_cases.xlsx', 'ac_online_signin_Result.xlsx')
 test.execute()
