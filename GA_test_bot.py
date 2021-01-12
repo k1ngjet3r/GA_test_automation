@@ -14,7 +14,7 @@ mic = sr.Microphone(device_index=1)
 
 def stt(recognizer, microphone):
     with microphone as source:
-        recognizer.adjust_for_ambient_noise(source, duration = 1)
+        recognizer.adjust_for_ambient_noise(source, duration = 3)
         audio = recognizer.listen(source, timeout= 300)
     
     response = {'success': True, "error": None, "transcription": None}
@@ -41,6 +41,7 @@ def tts(step):
     engine.say('Hey Google')
     engine.runAndWait()
     time.sleep(1)
+    # Giving the commend
     engine.say(step)
     engine.runAndWait()
 
