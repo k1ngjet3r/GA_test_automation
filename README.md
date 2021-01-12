@@ -12,7 +12,7 @@ Also, there are few module that need to install:
 
 Those modules can be install by copy the following text into cmd:
 '''shell
-
+ㄨ
 
 # Summary
 This project consissts of five major parts: 

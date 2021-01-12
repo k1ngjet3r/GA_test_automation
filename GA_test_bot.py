@@ -15,7 +15,7 @@ mic = sr.Microphone(device_index=1)
 def stt(recognizer, microphone):
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source, duration = 1)
-        audio = recognizer.listen(source, timeout= 10)
+        audio = recognizer.listen(source, timeout= 300)
     
     response = {'success': True, "error": None, "transcription": None}
     print('Collecting Respond...')
@@ -40,7 +40,7 @@ def tts(step):
     #say "hey google" first and than say the command with 0.5 second delay
     engine.say('Hey Google')
     engine.runAndWait()
-    time.sleep(0.5)
+    time.sleep(1)
     engine.say(step)
     engine.runAndWait()
 
@@ -122,5 +122,5 @@ class Automation():
         print('Saving the file {}'.format(self.output_file))
         self.wb.save(self.output_file)
 
-test = Automation('ac_cases.xlsx', 'Result.xlsx')
+test = Automation('ac_online_signin.xlsx', 'ac_online_signin_Result.xlsx')
 test.execute()
