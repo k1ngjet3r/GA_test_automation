@@ -12,15 +12,26 @@ import os
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
 
+def ambient_noise(recog, mic):
+    with mic as source:
+        print('Adjusting amnient noise...')
+        # Collect and adjust the ambient nosie threadhole
+        recog.adjust_for_ambient_noise(source, duration = 5)
+
+
 def stt(recognizer, microphone):
     with microphone as source:
-        recognizer.adjust_for_ambient_noise(source, duration = 1)
+        # print('Adjusting ambient noise')
+        # recognizer.adjust_for_ambient_noise(source, duration = 1)
+        
+        # Collecting the respond with 150 seconds of waiting time
         print('Collecting Respond...')
         audio = recognizer.listen(source, timeout= 150)
     
     response = {'success': True, "error": None, "transcription": None}
-    # print('Collecting Respond...')
+    
     try:
+        # set the recognize language to English and convert the speech to text
         recog = recognizer.recognize_google(audio, language='en-US')
         response["transcription"] = recog
 
@@ -39,11 +50,11 @@ def stt(recognizer, microphone):
 
 def tts(step):
     engine = pyttsx3.init()
-    engine.setProperty('rate', 100)
+    engine.setProperty('rate', 105)
     #say "hey google" first and than say the command with 0.5 second delay
     engine.say('Hey Google')
     engine.runAndWait()
-    time.sleep(1)
+    time.sleep(0.6)
     # Giving the commend
     engine.say(step)
     engine.runAndWait()
@@ -114,12 +125,14 @@ class Automation():
             result = [tcid, cases[tcid], ToEx]
             print('Commend: {}'.format(cases[tcid]))
 
+            # Adjusting the ambient noise threadhole for 5 seconds
+            ambient_noise(r, mic)
+
             # Generate the speech
             tts(cases[tcid])
-            time.sleep(1)
+            # time.sleep(0.5)
 
             # Reciving Respond
-            # print('Collecting Respond...')
             respond = stt(r, mic)
             print("Respond: {}".format(str(respond['transcription'])))
 
@@ -134,7 +147,7 @@ class Automation():
                 # Try to perform the test case again
                 print('Try to perform the case again')
                 tts(cases[tcid])
-                time.sleep(0.5)
+                # time.sleep(0.5)
                 # Reciving Respond
                 # print('Collecting Respond...')
                 respond = stt(r, mic)
