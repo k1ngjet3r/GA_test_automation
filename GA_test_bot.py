@@ -14,8 +14,8 @@ mic = sr.Microphone(device_index=1)
 
 def stt(recognizer, microphone):
     with microphone as source:
-        recognizer.adjust_for_ambient_noise(source, duration = 3)
-        audio = recognizer.listen(source, timeout= 300)
+        recognizer.adjust_for_ambient_noise(source, duration = 1)
+        audio = recognizer.listen(source, timeout= 150)
     
     response = {'success': True, "error": None, "transcription": None}
     # print('Collecting Respond...')
