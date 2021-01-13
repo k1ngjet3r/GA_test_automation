@@ -38,7 +38,7 @@ def stt(recognizer, microphone):
 
 def tts(step):
     engine = pyttsx3.init()
-    engine.setProperty('rate', 120)
+    engine.setProperty('rate', 100)
     #say "hey google" first and than say the command with 0.5 second delay
     engine.say('Hey Google')
     engine.runAndWait()
@@ -108,7 +108,7 @@ class Automation():
             print('Commend: {}'.format(cases[tcid]))
             # Generate the speech
             tts(cases[tcid])
-
+            time.sleep(1)
             # Reciving Respond
             print('Collecting Respond...')
             respond = stt(r, mic)
@@ -124,6 +124,7 @@ class Automation():
                 # Try to perform the test case again
                 print('Try to perform the case again')
                 tts(cases[tcid])
+                time.sleep(0.5)
                 # Reciving Respond
                 print('Collecting Respond...')
                 respond = stt(r, mic)
@@ -145,5 +146,5 @@ class Automation():
         print('Saving the file {}'.format(self.output_file))
         self.wb.save(self.output_file)
 
-test = Automation('ac_cases.xlsx', 'ac_online_signin_Result.xlsx')
+test = Automation('ac_online_signin.xlsx', 'ac_online_signin_Result.xlsx')
 test.execute()
