@@ -2,11 +2,11 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 from datetime import datetime
 from pushbullet import Pushbullet
+from gtts import gTTS
+import speech_recognition as sr
 import cv2
 import pyttsx3
 import time
-import speech_recognition as sr
-from gtts import gTTS 
 import os
 
 r = sr.Recognizer()
@@ -15,6 +15,7 @@ mic = sr.Microphone(device_index=1)
 def stt(recognizer, microphone):
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source, duration = 1)
+        print('Collecting Respond...')
         audio = recognizer.listen(source, timeout= 150)
     
     response = {'success': True, "error": None, "transcription": None}
@@ -82,6 +83,7 @@ def capturing(tcid):
     cv2.destroyAllWindows()
 
 def push_noti(message):
+    # load the key from the pushbullet_api_key.txt
     key = open('pushbullet_api_key.txt', 'r').read()
     pb = Pushbullet(key)
     dev = pb.get_device('Google Pixel 4a (5G)')
@@ -96,28 +98,36 @@ class Automation():
         # Create an empty workbook for output
         self.wb = Workbook()
         self.wb.active
+        # Create the sheetname
         self.wb.create_sheet('AutoResult')
+        # Append title of the sheet
         self.wb['AutoResult'].append(['TCID', 'Test Step', 'Time of Execution', 'GA_respond'])
 
     def execute(self):
+        # Generate the dictionary for the case
         cases = {str(tcid):str(step) for tcid, step in self.sheet.iter_rows(max_col=2, values_only=True) if tcid is not None}
+        
+        # Iterate the case and feed it to the main loop
         for tcid in cases:
             ToEx = datetime.now()
             print('{} Execute Case {}'.format(ToEx, tcid))
             result = [tcid, cases[tcid], ToEx]
             print('Commend: {}'.format(cases[tcid]))
+
             # Generate the speech
             tts(cases[tcid])
             time.sleep(1)
+
             # Reciving Respond
-            print('Collecting Respond...')
+            # print('Collecting Respond...')
             respond = stt(r, mic)
             print("Respond: {}".format(str(respond['transcription'])))
 
-            # Capturing the image
+            # Capturing the image if the computer captured the respond
             if respond['transcription'] is not None:
                 capturing(tcid)
             
+            # If the computer cannot get the respond, it will execute the case again
             else:
                 # give it 5 sec to clear the previous condition
                 time.sleep(5)
@@ -126,21 +136,24 @@ class Automation():
                 tts(cases[tcid])
                 time.sleep(0.5)
                 # Reciving Respond
-                print('Collecting Respond...')
+                # print('Collecting Respond...')
                 respond = stt(r, mic)
                 print("Respond: {}".format(str(respond['transcription'])))
 
                 if respond['transcription'] is not None:
                     capturing(tcid)
+                
+                # Won't capture photo if the respond is still none
                 else:
                     print('Fail to perform the test case {}'.format(tcid))
 
+            # Append the result to the output excel file
             result.append(str(respond['transcription']))
             self.wb['AutoResult'].append(result)
             print(respond)
             print('====================================================')
-            time.sleep(5)
-
+            time.sleep(3)
+        # Push the complete notification to the phone using PushBullet
         push_noti('All test cases executed.')
         # Export the result
         print('Saving the file {}'.format(self.output_file))
