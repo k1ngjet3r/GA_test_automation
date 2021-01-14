@@ -122,11 +122,14 @@ class Automation():
         for tcid in cases:
             ToEx = datetime.now()
             print('{} Execute Case {}'.format(ToEx, tcid))
-            result = [tcid, cases[tcid], ToEx]
-            print('Commend: {}'.format(cases[tcid]))
 
             # Adjusting the ambient noise threadhole for 5 seconds
             ambient_noise(r, mic)
+
+            result = [tcid, cases[tcid], ToEx]
+            print('Commend: {}'.format(cases[tcid]))
+
+            
 
             # Generate the speech
             tts(cases[tcid])
@@ -142,14 +145,15 @@ class Automation():
             
             # If the computer cannot get the respond, it will execute the case again
             else:
-                # give it 5 sec to clear the previous condition
-                time.sleep(5)
                 # Try to perform the test case again
                 print('Try to perform the case again')
+                 
+                # give it 5 sec to clear the previous condition and recalibrate the ambient noise threadhole
+                ambient_noise(r, mic)
+
                 tts(cases[tcid])
-                # time.sleep(0.5)
+        
                 # Reciving Respond
-                # print('Collecting Respond...')
                 respond = stt(r, mic)
                 print("Respond: {}".format(str(respond['transcription'])))
 
@@ -164,7 +168,7 @@ class Automation():
             result.append(str(respond['transcription']))
             self.wb['AutoResult'].append(result)
             print(respond)
-            print('====================================================')
+            print('====================================================================================')
             time.sleep(3)
         # Push the complete notification to the phone using PushBullet
         push_noti('All test cases executed.')
@@ -172,5 +176,5 @@ class Automation():
         print('Saving the file {}'.format(self.output_file))
         self.wb.save(self.output_file)
 
-test = Automation('ac_online_signin.xlsx', 'ac_online_signin_Result.xlsx')
+test = Automation('ac_online_signOUT.xlsx', 'ac_online_signOUT_Result.xlsx')
 test.execute()
