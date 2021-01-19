@@ -135,69 +135,74 @@ class Automation():
         
         # Iterate the case and feed it to the main loop
         for tcid in cases:
-            num += 1
-            ToEx = datetime.now()
-            print("Case {}/{}".format(num, case_amount))
-            print('{} Execute Case {}'.format(ToEx, tcid))
+            try:
+                num += 1
+                ToEx = datetime.now()
+                print("Case {}/{}".format(num, case_amount))
+                print('{} Execute Case {}'.format(ToEx, tcid))
 
-            # Adjusting the ambient noise threadhole for 5 seconds
-            ambient_noise(r, mic)
-
-            result = [tcid, cases[tcid], ToEx]
-
-            # Formatting the command
-            text = cases[tcid].split('"')[-2]
-            text = text.replace('\n', ' ')
-            print('Commend: {}'.format(text))
-
-            # Generate the speech
-            
-            tts(text)
-            # time.sleep(0.5)
-
-            # Reciving Respond
-            respond = stt(r, mic)
-            print("Respond: {}".format(str(respond['transcription'])))
-
-            # Capturing the image if the computer captured the respond
-            if respond['transcription'] is not None:
-                capturing(tcid)
-            
-            # If the computer cannot get the respond, it will execute the case again
-            else:
-                # Try to perform the test case again
-                print('===> Try to perform the case again')
-                 
-                # give it 5 sec to clear the previous condition and recalibrate the ambient noise threadhole
+                # Adjusting the ambient noise threadhole for 5 seconds
                 ambient_noise(r, mic)
 
+                result = [tcid, cases[tcid], ToEx]
+
+                # Formatting the command
+                text = cases[tcid].split('"')[-2]
+                text = text.replace('\n', ' ')
+                print('Commend: {}'.format(text))
+
+                # Generate the speech
+                
                 tts(text)
-        
+                # time.sleep(0.5)
+
                 # Reciving Respond
                 respond = stt(r, mic)
-                print("    Respond: {}".format(str(respond['transcription'])))
+                print("Respond: {}".format(str(respond['transcription'])))
 
+                # Capturing the image if the computer captured the respond
                 if respond['transcription'] is not None:
                     capturing(tcid)
                 
-                # Won't capture photo if the respond is still none
+                # If the computer cannot get the respond, it will execute the case again
                 else:
-                    print('    Fail to perform the test case {}'.format(tcid))
+                    # Try to perform the test case again
+                    print('===> Try to perform the case again')
+                    
+                    # give it 5 sec to clear the previous condition and recalibrate the ambient noise threadhole
+                    ambient_noise(r, mic)
 
-            # Append the result to the output excel file
-            result.append(str(respond['transcription']))
-            out[sheet_name].append(result)
-            print(respond)
-            print('====================================================================================')
-            time.sleep(3)
-        # Push the complete notification to the phone using PushBullet
+                    tts(text)
+            
+                    # Reciving Respond
+                    respond = stt(r, mic)
+                    print("    Respond: {}".format(str(respond['transcription'])))
 
-        
+                    if respond['transcription'] is not None:
+                        capturing(tcid)
+                    
+                    # Won't capture photo if the respond is still none
+                    else:
+                        print('    Fail to perform the test case {}'.format(tcid))
+                        push_noti('Fail to perform tcid: {}'.format(tcid))
+
+                # Append the result to the output excel file
+                result.append(str(respond['transcription']))
+                out[sheet_name].append(result)
+                print(respond)
+                print('====================================================================================')
+                time.sleep(3)
+
+            except:
+                print('Something went wrong, skipping case: {}'.format(tcid))
+                push_noti('Error occured when executing case: {}'.format(tcid))
+
 
 # online_signin
 print('Executing Online/Sign In cases')
 test_1 = Automation('ac_online_in.xlsx')
 test_1.execute(sheet_titles[0])
+push_noti('Stage 1 finished!')
 
 # disconnect WiFi
 print('***Disconnecting WiFi***')
@@ -207,6 +212,7 @@ wifi_controller(False)
 print('Executing Offline/Sign In cases')
 test_2 = Automation('ac_offline_in.xlsx')
 test_2.execute(sheet_titles[1])
+push_noti('Stage 2 finished!')
 
 # connect WiFi
 print(' ')
@@ -224,6 +230,7 @@ print(' ')
 print('Executing Online/Sign out cases')
 test_3 = Automation('ac_online_out.xlsx')
 test_3.execute(sheet_titles[2])
+push_noti('Stage 3 finished!')
 
 # disconnect WiFi
 print(' ')
