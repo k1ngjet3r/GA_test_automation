@@ -15,7 +15,8 @@ exe_date = today[:4] + today[5:7] + today[8:]
 
 output_name = 'ac_auto_result_{}.xlsx'.format(exe_date)
 sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
-out = Workbook().active
+out = Workbook()
+out.active
 for name in sheet_titles:
     out.create_sheet(name)
     out[name].append(['TCID', 'Test Step', 'Time of Execution', 'GA_respond'])
@@ -109,13 +110,13 @@ def push_noti(message):
 
 def wifi_controller(online=True):
     if online:
-        p = subprocess.Popen(["powershell.exe", '\\connection\\enableWIFI.ps1'], stdout=sys.stdout)
+        p = subprocess.Popen(["powershell.exe", 'C:\\Users\\GM-PC-03\\Documents\\GA_test_automation\\connection\\enableWIFI.ps1'], stdout=sys.stdout)
     elif online is False:
-        p = subprocess.Popen(["powershell.exe", '\\connection\\disableWIFI.ps1'], stdout=sys.stdout)
+        p = subprocess.Popen(["powershell.exe", 'C:\\Users\\GM-PC-03\\Documents\\GA_test_automation\\connection\\disableWIFI.ps1'], stdout=sys.stdout)
     p.communicate()
 
 def sign_out():
-    p = subprocess.Popen(['Powershell.exe', '\\sign_status\\SignOut.ps1'])
+    p = subprocess.Popen(['powershell.exe', 'C:\\Users\\GM-PC-03\\Documents\\GA_test_automation\\sign_status\\SignOut.ps1'])
     p.communicate()
 
 class Automation():
@@ -129,20 +130,29 @@ class Automation():
         cases = {str(tcid):str(step) for tcid, step in self.sheet.iter_rows(max_col=2, values_only=True) if tcid is not None}
         case_amount = len(cases)
         print('executing file {}'.format(self.input_file))
+
+        num = 0
         
         # Iterate the case and feed it to the main loop
         for tcid in cases:
+            num += 1
             ToEx = datetime.now()
-            print('{} Execute Case {}/{}'.format(ToEx, tcid, case_amount))
+            print("Case {}/{}".format(num, case_amount))
+            print('{} Execute Case {}'.format(ToEx, tcid))
 
             # Adjusting the ambient noise threadhole for 5 seconds
             ambient_noise(r, mic)
 
             result = [tcid, cases[tcid], ToEx]
-            print('Commend: {}'.format(cases[tcid]))
+
+            # Formatting the command
+            text = cases[tcid].split('"')[-2]
+            text = text.replace('\n', ' ')
+            print('Commend: {}'.format(text))
 
             # Generate the speech
-            tts(cases[tcid])
+            
+            tts(text)
             # time.sleep(0.5)
 
             # Reciving Respond
@@ -161,18 +171,18 @@ class Automation():
                 # give it 5 sec to clear the previous condition and recalibrate the ambient noise threadhole
                 ambient_noise(r, mic)
 
-                tts(cases[tcid])
+                tts(text)
         
                 # Reciving Respond
                 respond = stt(r, mic)
-                print("Respond: {}".format(str(respond['transcription'])))
+                print("    Respond: {}".format(str(respond['transcription'])))
 
                 if respond['transcription'] is not None:
                     capturing(tcid)
                 
                 # Won't capture photo if the respond is still none
                 else:
-                    print('Fail to perform the test case {}'.format(tcid))
+                    print('    Fail to perform the test case {}'.format(tcid))
 
             # Append the result to the output excel file
             result.append(str(respond['transcription']))
@@ -185,30 +195,46 @@ class Automation():
         
 
 # online_signin
-test_1 = Automation('ac_online_signIn.xlsx')
+print('Executing Online/Sign In cases')
+test_1 = Automation('ac_online_in.xlsx')
 test_1.execute(sheet_titles[0])
 
 # disconnect WiFi
+print('***Disconnecting WiFi***')
 wifi_controller(False)
 
 # offline_signin
-test_2 = Automation('ac_offline_signIn.xlsx')
+print('Executing Offline/Sign In cases')
+test_2 = Automation('ac_offline_in.xlsx')
 test_2.execute(sheet_titles[1])
 
 # connect WiFi
+print(' ')
+print('***Connecting WiFi***')
 wifi_controller(True)
+time.sleep(10)
+
 # Sign out google account
+print('***Signing out google account***')
 sign_out()
+print(' ')
+print(' ')
 
 # online_signout
-test_3 = Automation('ac_online_signOut.xlsx')
+print('Executing Online/Sign out cases')
+test_3 = Automation('ac_online_out.xlsx')
 test_3.execute(sheet_titles[2])
 
 # disconnect WiFi
+print(' ')
+print('***Disconnecting WiFi***')
 wifi_controller(False)
+print(' ')
+print(' ')
 
 # offline_signout
-test_4 = Automation('ac_offline_signOut.xlsx')
+print('Executing Offline/Sign out cases')
+test_4 = Automation('ac_offline_out.xlsx')
 test_4.execute(sheet_titles[3])
 
 push_noti('All test cases executed.')
