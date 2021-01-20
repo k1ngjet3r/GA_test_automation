@@ -5,7 +5,7 @@ from datetime import date
 from pushbullet import Pushbullet
 from gtts import gTTS
 import speech_recognition as sr
-import subprocess, sys, cv2, pyttsx3, time, os
+import subprocess, sys, cv2, pyttsx3, time, os, re
 
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
@@ -19,7 +19,7 @@ out = Workbook()
 out.active
 for name in sheet_titles:
     out.create_sheet(name)
-    out[name].append(['TCID', 'Test Step', 'Time of Execution', 'GA_respond'])
+    out[name].append(['TCID', 'Test Step', 'Time of Execution', 'GA_respond', 'Result'])
 
 def ambient_noise(recog, mic):
     with mic as source:
@@ -127,6 +127,17 @@ def sign_out():
     p = subprocess.Popen(
         ['powershell.exe', 'C:\\Users\\GM-PC-03\\Documents\\GA_test_automation\\sign_status\\SignOut.ps1'])
     p.communicate()
+
+
+def match_slice(sentence, keywords):
+    sen = sentence.lower()
+    for key in keywords:
+        if re.search(key, sen):
+            return True
+    return False
+
+def pass_or_fail(respond):
+    fail_keyword = "I'm offline"
 
 
 class Automation():
