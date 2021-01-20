@@ -161,6 +161,7 @@ class Automation():
                 # Formatting the command
                 text = cases[tcid].split('"')[-2]
                 text = text.replace('\n', ' ')
+                text = text.replace('/', '')
                 print('Commend: {}'.format(text))
 
                 # Generate the speech
