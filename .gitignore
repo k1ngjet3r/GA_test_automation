@@ -6,3 +6,5 @@ ac_offline_in.xlsx
 ac_online_in.xlsx
 ac_offline_out.xlsx
 ac_online_out.xlsx
+.xlsx
+*.xlsx

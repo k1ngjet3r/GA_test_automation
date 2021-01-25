@@ -13,7 +13,7 @@ mic = sr.Microphone(device_index=1)
 today = str(date.today())
 exe_date = today[:4] + today[5:7] + today[8:]
 
-output_name = 'ac_auto_result_{}.xlsx'.format(exe_date)
+output_name = 'auto_result_{}.xlsx'.format(exe_date)
 sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
 out = Workbook()
 out.active
@@ -170,9 +170,15 @@ class Automation():
                 result = [tcid, cases[tcid], ToEx]
 
                 # Formatting the command
-                text = cases[tcid].split('"')[-2]
-                text = text.replace('\n', ' ')
+                text = cases[tcid].replace('\n', ' ')
+                text = text.replace('”', '"')
+                text = text.replace('“', '"')
                 text = text.replace('/', '')
+                text = text.split('"')
+                if len(text) == 1:
+                    text = text[0]
+                else:
+                    text = text[-2]
                 print('Commend: {}'.format(text))
 
                 # Generate the speech
@@ -231,8 +237,8 @@ push_noti('Execution Started')
 
 # online_signin
 print('Executing Online/Sign In cases')
-push_noti('Executing ac_online_in.xlsx')
-test_1 = Automation('ac_online_in.xlsx')
+push_noti('Executing online_in.xlsx')
+test_1 = Automation('online_in.xlsx')
 test_1.execute(sheet_titles[0])
 push_noti('Stage 1 finished!')
 
@@ -242,8 +248,8 @@ wifi_controller(False)
 
 # offline_signin
 print('Executing Offline/Sign In cases')
-push_noti('Executing ac_offline_in.xlsx')
-test_2 = Automation('ac_offline_in.xlsx')
+push_noti('Executing offline_in.xlsx')
+test_2 = Automation('offline_in.xlsx')
 test_2.execute(sheet_titles[1])
 push_noti('Stage 2 finished!')
 
@@ -261,8 +267,8 @@ print(' ')
 
 # online_signout
 print('Executing Online/Sign out cases')
-push_noti('Executing ac_online_out.xlsx')
-test_3 = Automation('ac_online_out.xlsx')
+push_noti('Executing online_out.xlsx')
+test_3 = Automation('online_out.xlsx')
 test_3.execute(sheet_titles[2])
 push_noti('Stage 3 finished!')
 
@@ -276,7 +282,7 @@ print(' ')
 # offline_signout
 print('Executing Offline/Sign out cases')
 push_noti('Executing ac_offline_out.xlsx')
-test_4 = Automation('ac_offline_out.xlsx')
+test_4 = Automation('offline_out.xlsx')
 test_4.execute(sheet_titles[3])
 
 push_noti('All test cases executed.')
