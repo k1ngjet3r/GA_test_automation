@@ -13,10 +13,13 @@ mic = sr.Microphone(device_index=1)
 today = str(date.today())
 exe_date = today[:4] + today[5:7] + today[8:]
 
+path = 'C:\\control\\'
+
 output_name = 'auto_result_{}.xlsx'.format(exe_date)
 sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
 out = Workbook()
 out.active
+
 for name in sheet_titles:
     out.create_sheet(name)
     out[name].append(['TCID', 'Test Step', 'Time of Execution', 'GA_respond', 'Result'])
@@ -104,6 +107,10 @@ def capturing(tcid):
     cam.release()
     cv2.destroyAllWindows()
 
+def screenshot():
+    p = subprocess.Popen(
+        ['powershell.exe', path+'screenshot.ps1'], stdout=sys.stdout)
+    p.communicate()
 
 def push_noti(message):
     # load the key from the pushbullet_api_key.txt
@@ -115,19 +122,23 @@ def push_noti(message):
 
 def wifi_controller(online=True):
     if online:
-        p = subprocess.Popen(
-            ["powershell.exe", 'C:\\Users\\GM-PC-03\\Documents\\GA_test_automation\\connection\\enableWIFI.ps1'], stdout=sys.stdout)
+        p = subprocess.Popen(  
+            ["powershell.exe", path+'enableWIFI.ps1'], stdout=sys.stdout)
     elif online is False:
         p = subprocess.Popen(
-            ["powershell.exe", 'C:\\Users\\GM-PC-03\\Documents\\GA_test_automation\\connection\\disableWIFI.ps1'], stdout=sys.stdout)
+            ["powershell.exe", path+'disableWIFI.ps1'], stdout=sys.stdout)
     p.communicate()
 
 
 def sign_out():
     p = subprocess.Popen(
-        ['powershell.exe', 'C:\\Users\\GM-PC-03\\Documents\\GA_test_automation\\sign_status\\SignOut.ps1'])
+        ['powershell.exe', path+'SignOut.ps1'])
     p.communicate()
 
+def sign_in():
+    p = subprocess.Popen(
+        ['powershell.exe', path+'SignIn.ps1'])
+    p.communicate()
 
 def match_slice(sentence, keywords):
     sen = sentence.lower()
@@ -136,8 +147,11 @@ def match_slice(sentence, keywords):
             return True
     return False
 
-def pass_or_fail(respond):
-    fail_keyword = "I'm offline"
+def analysis(respond):
+    fail_keyword = ["offline", "can't do that", 'sorry', 'trouble', 'wrong', 'try again']
+    if match_slice(respond.lower(), fail_keyword):
+        return False
+    return True
 
 
 class Automation():
@@ -222,6 +236,8 @@ class Automation():
 
                 # Append the result to the output excel file
                 result.append(str(respond['transcription']))
+                if analysis(str(respond['transcription'])):
+                    result.append("Pass")
                 out[sheet_name].append(result)
                 print(respond)
                 print(
@@ -232,60 +248,86 @@ class Automation():
                 print('Something went wrong, skipping case: {}'.format(tcid))
                 push_noti('Error occured when executing case: {}'.format(tcid))
 
+def exe():
+    push_noti('Execution Started')
 
-push_noti('Execution Started')
+    # online_signin
+    print('Executing Online/Sign In cases')
+    push_noti('Executing online_in.xlsx')
+    test_1 = Automation('online_in.xlsx')
+    test_1.execute(sheet_titles[0])
+    push_noti('Stage 1 finished!')
 
-# online_signin
-print('Executing Online/Sign In cases')
-push_noti('Executing online_in.xlsx')
-test_1 = Automation('online_in.xlsx')
-test_1.execute(sheet_titles[0])
-push_noti('Stage 1 finished!')
+    # disconnect WiFi
+    print('***Disconnecting WiFi***')
+    wifi_controller(False)
 
-# disconnect WiFi
-print('***Disconnecting WiFi***')
-wifi_controller(False)
+    # offline_signin
+    print('Executing Offline/Sign In cases')
+    push_noti('Executing offline_in.xlsx')
+    test_2 = Automation('offline_in.xlsx')
+    test_2.execute(sheet_titles[1])
+    push_noti('Stage 2 finished!')
 
-# offline_signin
-print('Executing Offline/Sign In cases')
-push_noti('Executing offline_in.xlsx')
-test_2 = Automation('offline_in.xlsx')
-test_2.execute(sheet_titles[1])
-push_noti('Stage 2 finished!')
+    # connect WiFi
+    print(' ')
+    print('***Connecting WiFi***')
+    wifi_controller(True)
+    time.sleep(10)
 
-# connect WiFi
-print(' ')
-print('***Connecting WiFi***')
-wifi_controller(True)
-time.sleep(10)
+    # Sign out google account
+    print('***Signing out google account***')
+    sign_out()
+    print(' ')
+    print(' ')
 
-# Sign out google account
-print('***Signing out google account***')
-sign_out()
-print(' ')
-print(' ')
+    # online_signout
+    print('Executing Online/Sign out cases')
+    push_noti('Executing online_out.xlsx')
+    test_3 = Automation('online_out.xlsx')
+    test_3.execute(sheet_titles[2])
+    push_noti('Stage 3 finished!')
 
-# online_signout
-print('Executing Online/Sign out cases')
-push_noti('Executing online_out.xlsx')
-test_3 = Automation('online_out.xlsx')
-test_3.execute(sheet_titles[2])
-push_noti('Stage 3 finished!')
+    # disconnect WiFi
+    print(' ')
+    print('***Disconnecting WiFi***')
+    wifi_controller(False)
+    print(' ')
+    print(' ')
 
-# disconnect WiFi
-print(' ')
-print('***Disconnecting WiFi***')
-wifi_controller(False)
-print(' ')
-print(' ')
+    # offline_signout
+    print('Executing Offline/Sign out cases')
+    push_noti('Executing ac_offline_out.xlsx')
+    test_4 = Automation('offline_out.xlsx')
+    test_4.execute(sheet_titles[3])
 
-# offline_signout
-print('Executing Offline/Sign out cases')
-push_noti('Executing ac_offline_out.xlsx')
-test_4 = Automation('offline_out.xlsx')
-test_4.execute(sheet_titles[3])
+    push_noti('All test cases executed.')
+    # Export the result
+    print('Saving the file {}'.format(output_name))
+    out.save(output_name)
 
-push_noti('All test cases executed.')
-# Export the result
-print('Saving the file {}'.format(output_name))
-out.save(output_name)
+def system_check():
+    # System Check
+    print('System Check...')
+    print('disconnect Wifi')
+    wifi_controller(False)
+
+    wifi_controller(True)
+
+    sign_out()
+
+    sign_in()
+
+    screenshot()
+
+
+
+while True:
+    system_check()
+    ans = input('Contiune? (y/n) ')
+    if ans == 'y':
+        exe()
+    else:
+        print("goodbye!")
+
+    
