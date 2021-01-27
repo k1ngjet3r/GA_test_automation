@@ -124,10 +124,13 @@ def wifi_controller(online=True):
     if online:
         p = subprocess.Popen(  
             ["powershell.exe", path+'enableWIFI.ps1'], stdout=sys.stdout)
+        p.communicate()
+
     elif online is False:
         p = subprocess.Popen(
             ["powershell.exe", path+'disableWIFI.ps1'], stdout=sys.stdout)
-    p.communicate()
+        p.communicate()
+
 
 
 def sign_out():
@@ -148,7 +151,7 @@ def match_slice(sentence, keywords):
     return False
 
 def analysis(respond):
-    fail_keyword = ["offline", "can't do that", 'sorry', 'trouble', 'wrong', 'try again', "don't"]
+    fail_keyword = ["offline", "can't do that", 'sorry', 'trouble', 'wrong', 'try again', "don't", "none"]
     if match_slice(respond.lower(), fail_keyword):
         return False
     return True
