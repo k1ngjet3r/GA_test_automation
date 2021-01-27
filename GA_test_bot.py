@@ -148,7 +148,7 @@ def match_slice(sentence, keywords):
     return False
 
 def analysis(respond):
-    fail_keyword = ["offline", "can't do that", 'sorry', 'trouble', 'wrong', 'try again']
+    fail_keyword = ["offline", "can't do that", 'sorry', 'trouble', 'wrong', 'try again', "don't"]
     if match_slice(respond.lower(), fail_keyword):
         return False
     return True
@@ -207,12 +207,13 @@ class Automation():
                 # Capturing the image if the computer captured the respond
                 if respond['transcription'] is not None:
                     capturing(tcid)
+                    screenshot()
 
                 # If the computer cannot get the respond, it will execute the case again
                 else:
                     # Try to perform the test case again
                     print('===> Try to perform the case again')
-
+                    time.sleep()
                     # give it 5 sec to clear the previous condition and recalibrate the ambient noise threadhole
                     ambient_noise(r, mic)
 
@@ -225,6 +226,7 @@ class Automation():
 
                     if respond['transcription'] is not None:
                         capturing(tcid)
+                        screenshot()
 
                     # Won't capture photo if the respond is still none
                     else:
@@ -248,86 +250,62 @@ class Automation():
                 print('Something went wrong, skipping case: {}'.format(tcid))
                 push_noti('Error occured when executing case: {}'.format(tcid))
 
-def exe():
-    push_noti('Execution Started')
 
-    # online_signin
-    print('Executing Online/Sign In cases')
-    push_noti('Executing online_in.xlsx')
-    test_1 = Automation('online_in.xlsx')
-    test_1.execute(sheet_titles[0])
-    push_noti('Stage 1 finished!')
+push_noti('Execution Started')
+# online_signin
+print('Executing Online/Sign In cases')
+push_noti('Executing online_in.xlsx')
+test_1 = Automation('online_in.xlsx')
+test_1.execute(sheet_titles[0])
+push_noti('Stage 1 finished!')
 
-    # disconnect WiFi
-    print('***Disconnecting WiFi***')
-    wifi_controller(False)
+# disconnect WiFi
+print('***Disconnecting WiFi***')
+wifi_controller(False)
 
-    # offline_signin
-    print('Executing Offline/Sign In cases')
-    push_noti('Executing offline_in.xlsx')
-    test_2 = Automation('offline_in.xlsx')
-    test_2.execute(sheet_titles[1])
-    push_noti('Stage 2 finished!')
+# offline_signin
+print('Executing Offline/Sign In cases')
+push_noti('Executing offline_in.xlsx')
+test_2 = Automation('offline_in.xlsx')
+test_2.execute(sheet_titles[1])
+push_noti('Stage 2 finished!')
 
-    # connect WiFi
-    print(' ')
-    print('***Connecting WiFi***')
-    wifi_controller(True)
-    time.sleep(10)
+# connect WiFi
+print(' ')
+print('***Connecting WiFi***')
+wifi_controller(True)
+time.sleep(10)
 
-    # Sign out google account
-    print('***Signing out google account***')
-    sign_out()
-    print(' ')
-    print(' ')
+# Sign out google account
+print('***Signing out google account***')
+sign_out()
+print(' ')
+print(' ')
 
-    # online_signout
-    print('Executing Online/Sign out cases')
-    push_noti('Executing online_out.xlsx')
-    test_3 = Automation('online_out.xlsx')
-    test_3.execute(sheet_titles[2])
-    push_noti('Stage 3 finished!')
+# online_signout
+print('Executing Online/Sign out cases')
+push_noti('Executing online_out.xlsx')
+test_3 = Automation('online_out.xlsx')
+test_3.execute(sheet_titles[2])
+push_noti('Stage 3 finished!')
 
-    # disconnect WiFi
-    print(' ')
-    print('***Disconnecting WiFi***')
-    wifi_controller(False)
-    print(' ')
-    print(' ')
+# disconnect WiFi
+print(' ')
+print('***Disconnecting WiFi***')
+wifi_controller(False)
+print(' ')
+print(' ')
 
-    # offline_signout
-    print('Executing Offline/Sign out cases')
-    push_noti('Executing ac_offline_out.xlsx')
-    test_4 = Automation('offline_out.xlsx')
-    test_4.execute(sheet_titles[3])
+# offline_signout
+print('Executing Offline/Sign out cases')
+push_noti('Executing ac_offline_out.xlsx')
+test_4 = Automation('offline_out.xlsx')
+test_4.execute(sheet_titles[3])
 
-    push_noti('All test cases executed.')
-    # Export the result
-    print('Saving the file {}'.format(output_name))
-    out.save(output_name)
+push_noti('All test cases executed.')
+# Export the result
+print('Saving the file {}'.format(output_name))
+out.save(output_name)
 
-def system_check():
-    # System Check
-    print('System Check...')
-    print('disconnect Wifi')
-    wifi_controller(False)
-
-    wifi_controller(True)
-
-    sign_out()
-
-    sign_in()
-
-    screenshot()
-
-
-
-while True:
-    system_check()
-    ans = input('Contiune? (y/n) ')
-    if ans == 'y':
-        exe()
-    else:
-        print("goodbye!")
 
     
