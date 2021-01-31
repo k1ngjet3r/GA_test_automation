@@ -1,3 +1,6 @@
 simple_test_cases.csv
 pushbullet_api_key.txt
 Result.xlsx
+test.py
+*.xlsx
+*.png
