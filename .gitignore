@@ -1,3 +1,5 @@
 simple_test_cases.csv
 pushbullet_api_key.txt
-Result.xlsx
+*.xlsx
+*.png
+*.txt

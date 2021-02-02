@@ -2,6 +2,7 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 from datetime import datetime
 from pushbullet import Pushbullet
+from datetime import date
 from gtts import gTTS
 import speech_recognition as sr
 import pyttsx3
@@ -12,6 +13,15 @@ import re
 # mic setup
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
+
+today = str(date.today())
+exe_date = today[:4] + today[5:7] + today[8:]
+
+# Setting up the output file
+output_name = 'SMS_auto_result_{}.xlsx'.format(exe_date)
+sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
+out = Workbook()
+out.active
 
 
 def ambient_noise(recog, mic):
@@ -92,7 +102,7 @@ class Automation():
         self.wb.create_sheet('AutoResult')
         # Append title of the sheet
         self.wb['AutoResult'].append(
-            ['TCID', 'Test Step', 'Time of Execution', 'GA_respond'])
+            ['TCID', 'Test Step', 'Time of Execution', 'GA_responds'])
 
     def step_detail(self, step, msg):
         test_command = []
@@ -131,6 +141,7 @@ class Automation():
     # When receiving "Sure, what is the message?"
 
     def whats_the_msg(self, msg, result):
+        print("--> What's the msg?")
         tts(msg)
         ga_msg_respond = stt(r, mic)
         result.append(ga_msg_respond)
@@ -147,6 +158,7 @@ class Automation():
 
     # when receiving "Okay, home, work, or mobile?"
     def phone_type(self, phonetype, msg, result):
+        print("--> Okay, home, work, or mobile?")
         tts(phonetype)
         phone_type_respond = stt(r, mic)
         result.append(phone_type_respond)
@@ -157,6 +169,7 @@ class Automation():
 
     # when receiving "who do you want to message to?"
     def who(self, name, phonetype, msg, result):
+        print("--> Who do you want to message to?")
         tts(name)
         who_respond = stt(r, mic)
         result.append(who_respond)
@@ -175,6 +188,7 @@ class Automation():
             result.append('Something went wrong')
 
     def is_that(self, msg, result):
+        print("--> is that <name>'s <type>?")
         tts('yes')
         is_that_respond = stt(r, mic)
         result.append(is_that_respond)
@@ -183,7 +197,7 @@ class Automation():
         else:
             result.append('Something went wrong')
 
-    def execute(self):
+    def execute(self, sheet_name):
         cases = {str(tcid): str(step) for tcid, step in self.sheet.iter_rows(
             max_col=2, values_only=True) if tcid is not None}
 
@@ -193,7 +207,9 @@ class Automation():
             ToEx = datetime.now()
             print('{} Execute Case: {}'.format(ToEx, tcid))
 
-            msg = "executing case {}".format(current_case)
+            msg = 'Test case nomber {}'.format(str(current_case))
+
+            current_case += 1
 
             test_command = self.step_detail(cases[tcid], msg)
 
@@ -210,7 +226,7 @@ class Automation():
             # Activate Google Assistant
             activate_ga()
             # wait 0.6 second before giving command
-            time.sleep(0.6)
+            time.sleep(0.8)
             # Give command "SMS/Send msg to <name>"
             tts(test_command[0]+' '+test_command[1])
             # collecting respond from Google Assistant
@@ -258,6 +274,8 @@ class Automation():
                 elif re.search('what', respond):
                     self.whats_the_msg(test_command[3], result)
 
-                # first attempt failed, performing second attempt
                 else:
                     result.append("Fail")
+
+            out[sheet_name].append(result)
+

@@ -12,6 +12,7 @@ import pyttsx3
 import time
 import os
 import re
+import sys
 
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
@@ -25,6 +26,11 @@ output_name = 'auto_result_{}.xlsx'.format(exe_date)
 sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
 out = Workbook()
 out.active
+
+
+def activate_ga():
+    os.system('adb shell am start -n com.google.android.carassistant/com.google.android.apps.gsa.binaries.auto.app.voiceplate.VoicePlateActivity')
+
 
 for name in sheet_titles:
     out.create_sheet(name)
@@ -73,9 +79,8 @@ def tts(step):
     engine = pyttsx3.init()
     engine.setProperty('rate', 105)
     # say "hey google" first and than say the command with 0.5 second delay
-    engine.say('Hey Google')
-    engine.runAndWait()
-    time.sleep(0.6)
+    activate_ga()
+    time.sleep(0.8)
     # Giving the commend
     engine.say(step)
     engine.runAndWait()
@@ -117,10 +122,12 @@ def capturing(tcid):
     cv2.destroyAllWindows()
 
 
-def screenshot():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'screenshot.ps1'], stdout=sys.stdout)
-    p.communicate()
+def screenshot(status):
+    os.system('$ex = Test-Path C:\Screenshot -PathType Container')
+    os.system('if($ex -ne 1) {mkdir C:\Screenshot}')
+    os.system('adb shell screencap -p /sdcard/{}.png'.format(status))
+    os.system('adb pull /sdcard/{}.png /Screenshot'.format(status))
+    os.system('adb shell rm /sdcard/{}.png'.format(status))
 
 
 def push_noti(message):
@@ -131,16 +138,14 @@ def push_noti(message):
     dev.push_note('Automation Notification', message)
 
 
-def wifi_controller(online=True):
-    if online:
-        p = subprocess.Popen(
-            ["powershell.exe", path+'enableWIFI.ps1'], stdout=sys.stdout)
-        p.communicate()
+def turn_on_wifi():
+    os.system('adb root')
+    os.system('adb shell "svc wifi enable"')
 
-    elif online is False:
-        p = subprocess.Popen(
-            ["powershell.exe", path+'disableWIFI.ps1'], stdout=sys.stdout)
-        p.communicate()
+
+def turn_off_wifi():
+    os.system('adb root')
+    os.system('adb shell "svc wifi disable"')
 
 
 def sign_out():
@@ -153,6 +158,11 @@ def sign_in():
     p = subprocess.Popen(
         ['powershell.exe', path+'SignIn.ps1'])
     p.communicate()
+
+
+def reset():
+    os.system('adb shell input keyevent 3')
+    time.sleep(3)
 
 
 def match_slice(sentence, keywords):
@@ -170,6 +180,25 @@ def analysis(respond):
         return False
     return True
 
+
+def system_check():
+    tts("hello")
+
+    time.sleep(5)
+
+    turn_off_wifi()
+
+    time.sleep(5)
+
+    turn_on_wifi()
+
+    time.sleep(5)
+
+    sign_out()
+
+    sign_in()
+
+    print('system check done')
 
 class Automation():
     def __init__(self, input_file):
@@ -210,44 +239,41 @@ class Automation():
                     text = text[0]
                 else:
                     text = text[-2]
-                print('Commend: {}'.format(text))
+                print('    Commend: {}'.format(text))
 
                 # Generate the speech
-
                 tts(text)
-                # time.sleep(0.5)
 
                 # Reciving Respond
                 respond = stt(r, mic)
-                print("Respond: {}".format(str(respond['transcription'])))
+                print("    Respond: {}".format(str(respond['transcription'])))
 
                 # Capturing the image if the computer captured the respond
                 if respond['transcription'] is not None:
                     capturing(tcid)
-                    screenshot()
 
                 # If the computer cannot get the respond, it will execute the case again
                 else:
                     # Try to perform the test case again
-                    print('===> Try to perform the case again')
-                    time.sleep()
-                    # give it 5 sec to clear the previous condition and recalibrate the ambient noise threadhole
+                    print('    ===> Try to perform the case again')
+                    
+                    # clear the previous condition and recalibrate the ambient noise threadhole
+                    reset()
                     ambient_noise(r, mic)
 
                     tts(text)
 
                     # Reciving Respond
                     respond = stt(r, mic)
-                    print("    Respond: {}".format(
+                    print("     Respond: {}".format(
                         str(respond['transcription'])))
 
                     if respond['transcription'] is not None:
                         capturing(tcid)
-                        screenshot()
 
                     # Won't capture photo if the respond is still none
                     else:
-                        print('    Fail to perform the test case {}'.format(tcid))
+                        print('     Fail to perform the test case {}'.format(tcid))
                         error_time = str(datetime.now())[:-7]
                         error_msg = '{}\nFail to perform case {}/{}\nTCID: {}'.format(
                             error_time, num, case_amount, tcid)
@@ -258,15 +284,19 @@ class Automation():
                 if analysis(str(respond['transcription'])):
                     result.append("Pass")
                 out[sheet_name].append(result)
+                out.save(output_name)
                 print(respond)
                 print(
                     '====================================================================================')
                 time.sleep(3)
 
             except:
-                print('Something went wrong, skipping case: {}'.format(tcid))
+                print('    Something went wrong, skipping case: {}'.format(tcid))
                 push_noti('Error occured when executing case: {}'.format(tcid))
 
+
+# Create "auto_log.txt" for storing log
+sys.stdout = open('auto_log.txt', 'w')
 
 push_noti('Execution Started')
 # online_signin
@@ -278,7 +308,9 @@ push_noti('Stage 1 finished!')
 
 # disconnect WiFi
 print('***Disconnecting WiFi***')
-wifi_controller(False)
+turn_off_wifi()
+time.sleep(3)
+screenshot('offline_in')
 
 # offline_signin
 print('Executing Offline/Sign In cases')
@@ -290,7 +322,7 @@ push_noti('Stage 2 finished!')
 # connect WiFi
 print(' ')
 print('***Connecting WiFi***')
-wifi_controller(True)
+turn_on_wifi()
 time.sleep(10)
 
 # Sign out google account
@@ -298,6 +330,9 @@ print('***Signing out google account***')
 sign_out()
 print(' ')
 print(' ')
+
+time.sleep(3)
+screenshot('Online_out')
 
 # online_signout
 print('Executing Online/Sign out cases')
@@ -309,9 +344,12 @@ push_noti('Stage 3 finished!')
 # disconnect WiFi
 print(' ')
 print('***Disconnecting WiFi***')
-wifi_controller(False)
+turn_off_wifi()
 print(' ')
 print(' ')
+
+time.sleep(3)
+screenshot('Offline_out')
 
 # offline_signout
 print('Executing Offline/Sign out cases')
@@ -323,3 +361,5 @@ push_noti('All test cases executed.')
 # Export the result
 print('Saving the file {}'.format(output_name))
 out.save(output_name)
+
+sys.stdout.close()
