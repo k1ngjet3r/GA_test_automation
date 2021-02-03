@@ -224,7 +224,7 @@ class Automation():
             self.whats_the_msg(msg, result)
 
         elif re.search('calling', who_respond):
-            self.calling()
+            self.calling(result)
 
         else:
             print('Unrecognitized respond: {}'.format(who_respond))
@@ -348,6 +348,6 @@ class Automation():
             out[sheet_name].append(result)
 
 
-test = Automation('sms_cases.xlsx', 'output.xlsx')
+test = Automation('Android_online_in.xlsx', 'output.xlsx')
 
 test.execute('Online_In')
