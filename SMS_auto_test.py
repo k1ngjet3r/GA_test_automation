@@ -27,6 +27,8 @@ for name in sheet_titles:
     out[name].append(
         ['TCID', 'Test Step', 'Time of Execution', 'GA_respond', 'Result'])
 
+out.save('sms_result.xlsx')
+
 
 def ambient_noise(recog, mic):
     with mic as source:
@@ -94,19 +96,10 @@ def push_noti(message):
 
 
 class Automation():
-    def __init__(self, input_file, output_file):
+    def __init__(self, input_file):
         self.input_file = str(input_file)
-        self.output_file = str(output_file)
         # loading the test cases file
         self.sheet = load_workbook(self.input_file).active
-        # Create an empty workbook for output
-        self.wb = Workbook()
-        self.wb.active
-        # Create the sheetname
-        self.wb.create_sheet('AutoResult')
-        # Append title of the sheet
-        self.wb['AutoResult'].append(
-            ['TCID', 'Test Step', 'Time of Execution', 'GA_responds'])
 
     def step_detail(self, step, msg):
         step = step.lower()
@@ -331,7 +324,7 @@ class Automation():
 
             test_command = self.step_detail(cases[tcid], msg)
 
-            result = [tcid, str(test_command), ToEx]
+            result = [ToEx, tcid, str(test_command)]
 
             '''
                 Command should be something like this
@@ -346,8 +339,9 @@ class Automation():
 
 
             out[sheet_name].append(result)
+            out.save('sms_result.xlsx')
 
 
-test = Automation('Android_online_in.xlsx', 'output.xlsx')
+test = Automation('Android_online_in.xlsx')
 
 test.execute('Online_In')
