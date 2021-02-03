@@ -137,8 +137,12 @@ class Automation():
             test_command.append(default_name[0] + ' ' + default_name[1])
 
         # determine the phone type
-        if re.search('work', step):
+        if re.search('work', step) and re.search('the work', step) is False:
             test_command.append('work')
+        
+        elif re.search('home', step):
+            test_command.append('home')
+
         else:
             test_command.append('mobile')
 
