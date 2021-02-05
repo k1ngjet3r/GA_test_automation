@@ -34,7 +34,7 @@ def ambient_noise(recog, mic):
     with mic as source:
         print('Adjusting amnient noise...')
         # Collect and adjust the ambient nosie threadhole
-        recog.adjust_for_ambient_noise(source, duration=5)
+        recog.adjust_for_ambient_noise(source, duration=2)
 
 
 def stt(recognizer, microphone):
@@ -151,7 +151,7 @@ class Automation():
         tts(msg)
         
         ga_msg_respond = stt(r, mic)
-        result.append(ga_msg_respond)
+        # result.append(ga_msg_respond)
         if re.search('change', ga_msg_respond):
             print('--> ...do you want to send it or change it?')
             print('   send')
@@ -167,6 +167,9 @@ class Automation():
         else:
             print('Unrecognitized respond: {}'.format(ga_msg_respond))
             result.append('Something went wrong')
+        
+        return result
+            
 
     # when receiving "Okay, home, work, or mobile?"
     def phone_type(self, phonetype, msg, result):
@@ -174,7 +177,8 @@ class Automation():
         print('   {}'.format(phonetype))
         tts(phonetype)
         phone_type_respond = stt(r, mic)
-        result.append(phone_type_respond)
+        print('--> {}'.format(phone_type_respond))
+        # result.append(phone_type_respond)
         if re.search('what', phone_type_respond):
             self.whats_the_msg(msg, result)
 
@@ -184,19 +188,24 @@ class Automation():
         else:
             print('Unrecognitized respond: {}'.format(phone_type_respond))
             result.append('Something went wrong')
+        
+        return result
 
     # when receiving "... for example, the first one"
     def first_one(self, phonetype, msg, result):
         print("--> ...for example, the first one?")
         tts('the first one')
-        phone_type_respond = stt(r, mic)
-        result.append(phone_type_respond)
-        if re.search('what', phone_type_respond):
+        first_one_respond = stt(r, mic)
+        print('--> {}'.format(first_one_respond))
+        # result.append(first_one_respond)
+        if re.search('what', first_one_respond):
             self.whats_the_msg(msg, result)
-        elif re.search('calling', phone_type_respond):
+        elif re.search('calling', first_one_respond):
             self.calling(result)
         else:
             result.append('Something went wrong')
+        return result
+
 
     # when receiving "who do you want to message to?"
     def who(self, name, phonetype, msg, result):
@@ -204,7 +213,8 @@ class Automation():
         print('   {}'.format(name))
         tts(name)
         who_respond = stt(r, mic)
-        result.append(who_respond)
+        print("--> {}".format(who_respond))
+        # result.append(who_respond)
         if re.search('is that', who_respond):
             self.is_that(msg, result)
 
@@ -222,13 +232,15 @@ class Automation():
         else:
             print('Unrecognitized respond: {}'.format(who_respond))
             result.append('Something went wrong')
+        return result
 
     def is_that(self, msg, result):
         print("--> is that <name>'s <type>?")
         print('   {}'.format("yes"))
         tts('yes')
         is_that_respond = stt(r, mic)
-        result.append(is_that_respond)
+        print("--> {}".format(is_that_respond))
+        # result.append(is_that_respond)
         if re.search('what', is_that_respond):
             self.whats_the_msg(msg, result)
         
@@ -238,26 +250,28 @@ class Automation():
         else:
             print('Unrecognitized respond: {}'.format(is_that_respond))
             result.append('Something went wrong')
+        return result
 
     def calling(self, result):
-        print('>>> Call made, ending the call in 5 seconds...')
+        print('>>> Call made, ending the call in 10 seconds...')
         # let is ring for 5 second and end the call
-        time.sleep(5)
+        time.sleep(10)
         os.system('adb shell input keyevent 6')
         result.append('Pass')
+        return result
 
-    def sms_attempt(self, test_command, result):
+    def attempt(self, test_command, result):
         # First attempt
         # adjusting the ambinat noise
         ambient_noise(r, mic)
         # Activate Google Assistant
         activate_ga()
         # wait 0.6 second before giving command
-        time.sleep(0.8)
+        time.sleep(0.6)
         # Give command "SMS/Send msg to <name>"
         tts(test_command[0]+' '+test_command[1])
         # collecting respond from Google Assistant
-        time.sleep(1)
+        time.sleep(2)
         respond = stt(r, mic)
         result.append(respond)
 
@@ -289,7 +303,7 @@ class Automation():
             tts(test_command[0]+' '+test_command[1])
             # collecting respond from Google Assistant
             respond = stt(r, mic)
-            result.append(respond)
+            # result.append(respond)
 
             if re.search('sorry', respond):
                 self.who(test_command[1], test_command[2], test_command[3], result)
@@ -308,6 +322,7 @@ class Automation():
 
             else:
                 result.append("Fail")
+        return result
 
     def execute(self, sheet_name):
         cases = {str(tcid): str(step) for tcid, step in self.sheet.iter_rows(max_col=2, values_only=True) if tcid is not None}
@@ -324,7 +339,7 @@ class Automation():
 
             test_command = self.step_detail(cases[tcid], msg)
 
-            result = [ToEx, tcid, str(test_command)]
+            test_result = [ToEx, tcid, str(test_command)]
 
             '''
                 Command should be something like this
@@ -332,13 +347,15 @@ class Automation():
             '''
 
             try:
-                self.sms_attempt(test_command, reset)
+                self.attempt(test_command, reset)
             
             except TypeError:
-                result.append("something went wrong ")
+                time.sleep(5)
+                reset()
+                # test_result.append("something went wrong ")
+                print("something went wrong ")
 
-
-            out[sheet_name].append(result)
+            out[sheet_name].append(test_result)
             out.save('sms_result.xlsx')
 
 
