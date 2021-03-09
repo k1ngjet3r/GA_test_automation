@@ -300,17 +300,17 @@ class Automation():
 
 push_noti('Execution Started')
 # online_signin
-print('Executing Online/Sign In cases')
-push_noti('Executing online_in.xlsx')
-test_1 = Automation('W11_auto.xlsx', 'Online_In')
-test_1.execute(sheet_titles[0])
-push_noti('Stage 1 finished!')
+# print('Executing Online/Sign In cases')
+# push_noti('Executing online_in.xlsx')
+# test_1 = Automation('W11_auto.xlsx', 'Online_In')
+# test_1.execute(sheet_titles[0])
+# push_noti('Stage 1 finished!')
 
 # disconnect WiFi
-print('***Disconnecting WiFi***')
-turn_off_wifi()
-time.sleep(3)
-screenshot('offline_in')
+# print('***Disconnecting WiFi***')
+# turn_off_wifi()
+# time.sleep(3)
+# screenshot('offline_in')
 
 # offline_signin
 print('Executing Offline/Sign In cases')
