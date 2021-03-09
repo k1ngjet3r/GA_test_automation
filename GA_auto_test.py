@@ -51,14 +51,14 @@ def stt(recognizer, microphone):
         # recognizer.adjust_for_ambient_noise(source, duration = 1)
 
         # Collecting the respond with 150 seconds of waiting time
-        print('Collecting Respond...')
-        audio = recognizer.listen(source, timeout=150)
+        print('    Collecting Respond...')
+        audio = recognizer.listen(source, timeout=200)
 
     response = {'success': True, "error": None, "transcription": None}
 
     try:
         # set the recognize language to English and convert the speech to text
-        recog = recognizer.recognize_google(audio, language='en-US')
+        recog = recognizer.recognize_google(audio, language='en-UK')
         response["transcription"] = recog
 
     except sr.RequestError:
@@ -80,7 +80,7 @@ def tts(step):
     engine.setProperty('rate', 105)
     # say "hey google" first and than say the command with 0.5 second delay
     activate_ga()
-    time.sleep(0.8)
+    time.sleep(1.5)
     # Giving the commend
     engine.say(step)
     engine.runAndWait()
@@ -201,10 +201,10 @@ def system_check():
     print('system check done')
 
 class Automation():
-    def __init__(self, input_file):
+    def __init__(self, input_file, sheet_name):
         self.input_file = str(input_file)
         # loading the test cases file
-        self.sheet = load_workbook(self.input_file).active
+        self.sheet = load_workbook(self.input_file)[sheet_name]
 
     def execute(self, sheet_name):
         # Generate the dictionary for the case
@@ -296,13 +296,13 @@ class Automation():
 
 
 # Create "auto_log.txt" for storing log
-sys.stdout = open('auto_log.txt', 'w')
+# sys.stdout = open('auto_log.txt', 'w')
 
 push_noti('Execution Started')
 # online_signin
 print('Executing Online/Sign In cases')
 push_noti('Executing online_in.xlsx')
-test_1 = Automation('online_in.xlsx')
+test_1 = Automation('W11_auto.xlsx', 'Online_In')
 test_1.execute(sheet_titles[0])
 push_noti('Stage 1 finished!')
 
@@ -315,7 +315,7 @@ screenshot('offline_in')
 # offline_signin
 print('Executing Offline/Sign In cases')
 push_noti('Executing offline_in.xlsx')
-test_2 = Automation('offline_in.xlsx')
+test_2 = Automation('W11_auto.xlsx', 'Offline_In')
 test_2.execute(sheet_titles[1])
 push_noti('Stage 2 finished!')
 
@@ -337,7 +337,7 @@ screenshot('Online_out')
 # online_signout
 print('Executing Online/Sign out cases')
 push_noti('Executing online_out.xlsx')
-test_3 = Automation('online_out.xlsx')
+test_3 = Automation('W11_auto.xlsx', 'Online_Out')
 test_3.execute(sheet_titles[2])
 push_noti('Stage 3 finished!')
 
@@ -354,7 +354,7 @@ screenshot('Offline_out')
 # offline_signout
 print('Executing Offline/Sign out cases')
 push_noti('Executing ac_offline_out.xlsx')
-test_4 = Automation('offline_out.xlsx')
+test_4 = Automation('W11_auto.xlsx', 'Offline_Out')
 test_4.execute(sheet_titles[3])
 
 push_noti('All test cases executed.')
@@ -362,4 +362,4 @@ push_noti('All test cases executed.')
 print('Saving the file {}'.format(output_name))
 out.save(output_name)
 
-sys.stdout.close()
+# sys.stdout.close()
