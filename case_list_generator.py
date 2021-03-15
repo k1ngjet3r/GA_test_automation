@@ -1,7 +1,7 @@
 from openpyxl import load_workbook, Workbook
 
 # Loading the full-list file
-full_list = load_workbook('W11_sorted_1340.xlsx')['auto']
+full_list = load_workbook('W12_sorted.xlsx')['auto']
 
 # Creating the automation-related cases spreadsheet
 wb = Workbook()

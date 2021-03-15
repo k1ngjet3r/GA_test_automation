@@ -298,24 +298,26 @@ class Automation():
 # Create "auto_log.txt" for storing log
 # sys.stdout = open('auto_log.txt', 'w')
 
+plan = 'W12_auto.xlsx'
+
 push_noti('Execution Started')
 # online_signin
-# print('Executing Online/Sign In cases')
-# push_noti('Executing online_in.xlsx')
-# test_1 = Automation('W11_auto.xlsx', 'Online_In')
-# test_1.execute(sheet_titles[0])
-# push_noti('Stage 1 finished!')
+print('Executing Online/Sign In cases')
+push_noti('Executing online_in.xlsx')
+test_1 = Automation(plan, 'Online_In')
+test_1.execute(sheet_titles[0])
+push_noti('Stage 1 finished!')
 
 # disconnect WiFi
-# print('***Disconnecting WiFi***')
-# turn_off_wifi()
-# time.sleep(3)
-# screenshot('offline_in')
+print('***Disconnecting WiFi***')
+turn_off_wifi()
+time.sleep(3)
+screenshot('offline_in')
 
 # offline_signin
 print('Executing Offline/Sign In cases')
 push_noti('Executing offline_in.xlsx')
-test_2 = Automation('W11_auto.xlsx', 'Offline_In')
+test_2 = Automation(plan, 'Offline_In')
 test_2.execute(sheet_titles[1])
 push_noti('Stage 2 finished!')
 
@@ -337,7 +339,7 @@ screenshot('Online_out')
 # online_signout
 print('Executing Online/Sign out cases')
 push_noti('Executing online_out.xlsx')
-test_3 = Automation('W11_auto.xlsx', 'Online_Out')
+test_3 = Automation(plan, 'Online_Out')
 test_3.execute(sheet_titles[2])
 push_noti('Stage 3 finished!')
 
@@ -354,7 +356,7 @@ screenshot('Offline_out')
 # offline_signout
 print('Executing Offline/Sign out cases')
 push_noti('Executing ac_offline_out.xlsx')
-test_4 = Automation('W11_auto.xlsx', 'Offline_Out')
+test_4 = Automation(plan, 'Offline_Out')
 test_4.execute(sheet_titles[3])
 
 push_noti('All test cases executed.')
