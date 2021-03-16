@@ -20,16 +20,11 @@ mic = sr.Microphone(device_index=1)
 today = str(date.today())
 exe_date = today[:4] + today[5:7] + today[8:]
 
-# path = 'C:\\control\\'
 
 output_name = 'auto_result_{}.xlsx'.format(exe_date)
 sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
 out = Workbook()
 out.active
-
-
-# def activate_ga():
-#     os.system('adb shell am start -n com.google.android.carassistant/com.google.android.apps.gsa.binaries.auto.app.voiceplate.VoicePlateActivity')
 
 
 for name in sheet_titles:
@@ -122,47 +117,12 @@ def capturing(tcid):
     cv2.destroyAllWindows()
 
 
-# def screenshot(status):
-#     os.system('$ex = Test-Path C:\Screenshot -PathType Container')
-#     os.system('if($ex -ne 1) {mkdir C:\Screenshot}')
-#     os.system('adb shell screencap -p /sdcard/{}.png'.format(status))
-#     os.system('adb pull /sdcard/{}.png /Screenshot'.format(status))
-#     os.system('adb shell rm /sdcard/{}.png'.format(status))
-
-
 def push_noti(message):
     # load the key from the pushbullet_api_key.txt
     key = open('pushbullet_api_key.txt', 'r').read()
     pb = Pushbullet(key)
     dev = pb.get_device('Google Pixel 4a (5G)')
     dev.push_note('Automation Notification', message)
-
-
-# def turn_on_wifi():
-#     os.system('adb root')
-#     os.system('adb shell "svc wifi enable"')
-
-
-# def turn_off_wifi():
-#     os.system('adb root')
-#     os.system('adb shell "svc wifi disable"')
-
-
-# def sign_out():
-#     p = subprocess.Popen(
-#         ['powershell.exe', path+'SignOut.ps1'])
-#     p.communicate()
-
-
-# def sign_in():
-#     p = subprocess.Popen(
-#         ['powershell.exe', path+'SignIn.ps1'])
-#     p.communicate()
-
-
-# def reset():
-#     os.system('adb shell input keyevent 3')
-#     time.sleep(3)
 
 
 def match_slice(sentence, keywords):
@@ -296,9 +256,6 @@ class Automation():
                 push_noti('Error occured when executing case: {}'.format(tcid))
 
 
-# Create "auto_log.txt" for storing log
-# sys.stdout = open('auto_log.txt', 'w')
-
 plan = 'W12_auto.xlsx'
 
 push_noti('Execution Started')
@@ -364,5 +321,3 @@ push_noti('All test cases executed.')
 # Export the result
 print('Saving the file {}'.format(output_name))
 out.save(output_name)
-
-# sys.stdout.close()
