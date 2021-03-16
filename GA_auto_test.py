@@ -6,13 +6,13 @@ from pushbullet import Pushbullet
 from gtts import gTTS
 import speech_recognition as sr
 import subprocess
-import sys
 import cv2
 import pyttsx3
 import time
 import os
 import re
-import sys
+from adb_cmd import *
+
 
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
@@ -20,7 +20,7 @@ mic = sr.Microphone(device_index=1)
 today = str(date.today())
 exe_date = today[:4] + today[5:7] + today[8:]
 
-path = 'C:\\control\\'
+# path = 'C:\\control\\'
 
 output_name = 'auto_result_{}.xlsx'.format(exe_date)
 sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
@@ -28,8 +28,8 @@ out = Workbook()
 out.active
 
 
-def activate_ga():
-    os.system('adb shell am start -n com.google.android.carassistant/com.google.android.apps.gsa.binaries.auto.app.voiceplate.VoicePlateActivity')
+# def activate_ga():
+#     os.system('adb shell am start -n com.google.android.carassistant/com.google.android.apps.gsa.binaries.auto.app.voiceplate.VoicePlateActivity')
 
 
 for name in sheet_titles:
@@ -122,12 +122,12 @@ def capturing(tcid):
     cv2.destroyAllWindows()
 
 
-def screenshot(status):
-    os.system('$ex = Test-Path C:\Screenshot -PathType Container')
-    os.system('if($ex -ne 1) {mkdir C:\Screenshot}')
-    os.system('adb shell screencap -p /sdcard/{}.png'.format(status))
-    os.system('adb pull /sdcard/{}.png /Screenshot'.format(status))
-    os.system('adb shell rm /sdcard/{}.png'.format(status))
+# def screenshot(status):
+#     os.system('$ex = Test-Path C:\Screenshot -PathType Container')
+#     os.system('if($ex -ne 1) {mkdir C:\Screenshot}')
+#     os.system('adb shell screencap -p /sdcard/{}.png'.format(status))
+#     os.system('adb pull /sdcard/{}.png /Screenshot'.format(status))
+#     os.system('adb shell rm /sdcard/{}.png'.format(status))
 
 
 def push_noti(message):
@@ -138,31 +138,31 @@ def push_noti(message):
     dev.push_note('Automation Notification', message)
 
 
-def turn_on_wifi():
-    os.system('adb root')
-    os.system('adb shell "svc wifi enable"')
+# def turn_on_wifi():
+#     os.system('adb root')
+#     os.system('adb shell "svc wifi enable"')
 
 
-def turn_off_wifi():
-    os.system('adb root')
-    os.system('adb shell "svc wifi disable"')
+# def turn_off_wifi():
+#     os.system('adb root')
+#     os.system('adb shell "svc wifi disable"')
 
 
-def sign_out():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'SignOut.ps1'])
-    p.communicate()
+# def sign_out():
+#     p = subprocess.Popen(
+#         ['powershell.exe', path+'SignOut.ps1'])
+#     p.communicate()
 
 
-def sign_in():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'SignIn.ps1'])
-    p.communicate()
+# def sign_in():
+#     p = subprocess.Popen(
+#         ['powershell.exe', path+'SignIn.ps1'])
+#     p.communicate()
 
 
-def reset():
-    os.system('adb shell input keyevent 3')
-    time.sleep(3)
+# def reset():
+#     os.system('adb shell input keyevent 3')
+#     time.sleep(3)
 
 
 def match_slice(sentence, keywords):
@@ -199,6 +199,7 @@ def system_check():
     sign_in()
 
     print('system check done')
+
 
 class Automation():
     def __init__(self, input_file, sheet_name):
@@ -256,7 +257,7 @@ class Automation():
                 else:
                     # Try to perform the test case again
                     print('    ===> Try to perform the case again')
-                    
+
                     # clear the previous condition and recalibrate the ambient noise threadhole
                     reset()
                     ambient_noise(r, mic)
