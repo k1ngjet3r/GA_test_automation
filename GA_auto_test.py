@@ -250,7 +250,8 @@ class Automation():
 
                 # Capturing the image if the computer captured the respond
                 if respond['transcription'] is not None:
-                    capturing(tcid)
+                    # capturing(tcid)
+                    print('    respond get')
 
                 # If the computer cannot get the respond, it will execute the case again
                 else:
@@ -269,7 +270,8 @@ class Automation():
                         str(respond['transcription'])))
 
                     if respond['transcription'] is not None:
-                        capturing(tcid)
+                        # capturing(tcid)
+                        print('respond get')
 
                     # Won't capture photo if the respond is still none
                     else:
@@ -298,7 +300,7 @@ class Automation():
 # Create "auto_log.txt" for storing log
 # sys.stdout = open('auto_log.txt', 'w')
 
-plan = 'W12_auto.xlsx'
+plan = 'W13_auto.xlsx'
 
 push_noti('Execution Started')
 # online_signin
