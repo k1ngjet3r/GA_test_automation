@@ -3,3 +3,4 @@ pushbullet_api_key.txt
 *.xlsx
 *.png
 *.txt
+json/google_account.json
