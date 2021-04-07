@@ -1,4 +1,4 @@
-import os, json
+import os, json, time
 from func.img_search import find_and_tap, checking_info_screen
 
 def sign_in_google_account():
@@ -24,10 +24,6 @@ def sign_in_google_account():
         'sign_in_to_google_text.png',
         'sign_in_on_car_screen.png',
         'username_entry_field.png',
-        'next_btn.png',
-        'password_entry_field.png',
-        'next_btn.png',
-        'done_btn.png'
     ]
 
     i = 0
@@ -36,20 +32,26 @@ def sign_in_google_account():
         print('[Sign-In] {}'.format(steps[i][:-4]))
         progress = find_and_tap(steps[i])
         
-        if not progress:
+        if progress == False:
             print('[Error] Fail on step {}'.format(steps[i][:-4]))
             break
         else:
-            checking_info_screen()
+            time.sleep(2)
+
             if steps[i][-9:-4] == 'field' and steps[i][:8] == 'username':
                 print('[DEBUG] entering username')
                 os.system('adb shell input text "{}"'.format(account['username']))
-            elif steps[i][-9:-4] == 'field' and steps[i][:8] == 'password':
+                time.sleep(1)
+                find_and_tap('next_btn.png')
+                time.sleep(5)
                 print('[DEBUG] entering password')
                 os.system('adb shell input text "{}"'.format(account['password']))
+                time.sleep(3)
+                find_and_tap('next_btn.png')
             i += 1
     else:
-        print('[DEBUG] DONE!')
+        print('[DEBUG] Signin Successful!')
+
 
 def sign_out_google_account():
     steps = ['google_maps_icon.png', 
@@ -59,13 +61,15 @@ def sign_out_google_account():
     
     i = 0
 
+    
     while i < len(steps):
         print('[Sign-In] {}'.format(steps[i][:-4]))
         progress = find_and_tap(steps[i])
-        if not progress:
+        if progress == False:
             print('[Error] Fail on step {}'.format(steps[i][:-4]))
             break
         else:
             i += 1
+            time.sleep(2)
     else:
-        print('[DEBUG] DONE!')
+        print('[DEBUG] Sign Out Successful!')

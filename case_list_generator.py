@@ -1,7 +1,7 @@
 from openpyxl import load_workbook, Workbook
 
 # Loading the full-list file
-full_list = load_workbook('W14_sorted.xlsx')['auto']
+full_list = load_workbook('W15_sorted_QIH22B-301.xlsx')['auto']
 
 # Creating the automation-related cases spreadsheet
 wb = Workbook()
@@ -27,4 +27,4 @@ for case in full_list.iter_rows(max_col=14, values_only=True):
                 wb['Online_Out'].append(row)
             elif connection == 'Offline' and sign_status == 'sign_out':
                 wb['Offline_Out'].append(row)
-            wb.save('W10_auto.xlsx')
+            wb.save('W15_1200_auto.xlsx')
