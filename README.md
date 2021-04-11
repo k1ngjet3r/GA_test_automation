@@ -11,9 +11,9 @@ Also, there are few module that need to install:
 5. speech_recognition
 
 Those modules can be install by copy the following text into cmd:
-'''shell
+```shell
     pip install <package>
-'''
+```
 
 # Summary
 This project consissts of five major parts: 
