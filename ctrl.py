@@ -21,15 +21,15 @@ def turn_off_wifi():
     os.system('adb shell "svc wifi disable"')
 
 
-def sign_out():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'SignOut.ps1'])
-    p.communicate()
+# def sign_out():
+#     p = subprocess.Popen(
+#         ['powershell.exe', path+'SignOut.ps1'])
+#     p.communicate()
 
-def sign_in():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'SignIn.ps1'])
-    p.communicate()
+# def sign_in():
+#     p = subprocess.Popen(
+#         ['powershell.exe', path+'SignIn.ps1'])
+#     p.communicate()
 
 def reset():
     os.system('adb shell input keyevent 3')

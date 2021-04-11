@@ -1,5 +1,5 @@
 import os, json, time
-from func.img_search import find_and_tap, checking_info_screen
+from func.img_search import find_and_tap, checking_screen
 
 def sign_in_google_account():
 

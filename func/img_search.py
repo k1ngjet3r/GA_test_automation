@@ -55,12 +55,12 @@ def get_cur_screenshot():
     #get device's current screen shot and place it in img\temp folder
     current_dir = os.getcwd() + '/img/temp'
     current_dir.replace('\\', '/')
-    capture = subprocess.check_output(['adb', 'shell', 'screencap', '-p', '/sdcard/current.png']).splitlines()
-    move_file = subprocess.check_output(['adb', 'pill', '/sdcard/current.png', current_dir]).splitlines()
+    # capture = subprocess.check_output(['adb', 'shell', 'screencap', '-p', '/sdcard/current.png']).splitlines()
+    # move_file = subprocess.check_output(['adb', 'pill', '/sdcard/current.png', current_dir]).splitlines()
 
-    print('         Screenshot Captured')
-    # os.system('adb shell screencap -p /sdcard/current.png')
-    # os.system('adb pull /sdcard/current.png {}'.format(current_dir))
+    # print('         Screenshot Captured')
+    os.system('adb shell screencap -p /sdcard/current.png')
+    os.system('adb pull /sdcard/current.png {}'.format(current_dir))
 
 def find_and_tap(pattern):
     get_cur_screenshot()

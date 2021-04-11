@@ -179,9 +179,9 @@ def system_check():
 
     time.sleep(5)
 
-    sign_out()
+    sign_in_google_account()
 
-    sign_in()
+    sign_out_google_account()
 
     print('system check done')
 
@@ -228,6 +228,7 @@ class Automation():
 
                 # Generate the speech
                 tts(text)
+                time.sleep(1.5)
 
                 # Reciving Respond
                 respond = stt(r, mic)
@@ -285,7 +286,7 @@ if __name__ == '__main__':
     # Create "auto_log.txt" for storing log
     # sys.stdout = open('auto_log.txt', 'w')
 
-    plan = 'W14_auto.xlsx'
+    plan = 'W15_1200_auto.xlsx'
 
     push_noti('Execution Started')
     # online_signin
@@ -316,7 +317,7 @@ if __name__ == '__main__':
 
     # Sign out google account
     print('***Signing out google account***')
-    sign_out_google_account
+    sign_out_google_account()
     print(' ')
     print(' ')
 
