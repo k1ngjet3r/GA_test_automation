@@ -286,21 +286,21 @@ if __name__ == '__main__':
     # Create "auto_log.txt" for storing log
     # sys.stdout = open('auto_log.txt', 'w')
 
-    plan = 'W15_1200_auto.xlsx'
+    plan = 'W16_auto_case_Prrduction.xlsx'
 
-    # push_noti('Execution Started')
-    # # online_signin
-    # print('Executing Online/Sign In cases')
-    # push_noti('Executing online_in.xlsx')
-    # test_1 = Automation(plan, 'Online_In')
-    # test_1.execute(sheet_titles[0])
-    # push_noti('Stage 1 finished!')
+    push_noti('Execution Started')
+    # online_signin
+    print('Executing Online/Sign In cases')
+    push_noti('Executing online_in.xlsx')
+    test_1 = Automation(plan, 'Online_In')
+    test_1.execute(sheet_titles[0])
+    push_noti('Stage 1 finished!')
 
-    # # disconnect WiFi
-    # print('***Disconnecting WiFi***')
-    # turn_off_wifi()
-    # time.sleep(3)
-    # screenshot('offline_in')
+    # disconnect WiFi
+    print('***Disconnecting WiFi***')
+    turn_off_wifi()
+    time.sleep(3)
+    screenshot('offline_in')
 
     # offline_signin
     print('Executing Offline/Sign In cases')
