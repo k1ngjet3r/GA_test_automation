@@ -5,7 +5,16 @@ from datetime import date
 from pushbullet import Pushbullet
 from gtts import gTTS
 import speech_recognition as sr
-import subprocess, sys, cv2, pyttsx3, time, os, re
+import subprocess
+import sys
+import cv2
+import pyttsx3
+import time
+import os
+import re
+import sys
+from func.sign_ctrl import sign_in_google_account, sign_out_google_account
+from func.screenshot import screenshot
 
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
@@ -20,15 +29,19 @@ sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
 out = Workbook()
 out.active
 
+def activate_ga():
+    os.system('adb shell am start -n com.google.android.carassistant/com.google.android.apps.gsa.binaries.auto.app.voiceplate.VoicePlateActivity')
+
 for name in sheet_titles:
     out.create_sheet(name)
-    out[name].append(['TCID', 'Test Step', 'Time of Execution', 'GA_respond', 'Result'])
+    out[name].append(
+        ['TCID', 'Test Step', 'Time of Execution', 'GA_respond', 'Result'])
 
 def ambient_noise(recog, mic):
     with mic as source:
         print('Adjusting amnient noise...')
         # Collect and adjust the ambient nosie threadhole
-        recog.adjust_for_ambient_noise(source, duration = 5)
+        recog.adjust_for_ambient_noise(source, duration=5)
 
 def stt(recognizer, microphone):
     with microphone as source:
@@ -36,14 +49,14 @@ def stt(recognizer, microphone):
         # recognizer.adjust_for_ambient_noise(source, duration = 1)
 
         # Collecting the respond with 150 seconds of waiting time
-        print('Collecting Respond...')
-        audio = recognizer.listen(source, timeout=150)
+        print('    Collecting Respond...')
+        audio = recognizer.listen(source, timeout=200)
 
     response = {'success': True, "error": None, "transcription": None}
 
     try:
         # set the recognize language to English and convert the speech to text
-        recog = recognizer.recognize_google(audio, language='en-US')
+        recog = recognizer.recognize_google(audio, language='en-UK')
         response["transcription"] = recog
 
     except sr.RequestError:
@@ -59,18 +72,15 @@ def stt(recognizer, microphone):
         response['error'] = 'No respond from Google Assistant'
     return response
 
-
 def tts(step):
     engine = pyttsx3.init()
     engine.setProperty('rate', 105)
     # say "hey google" first and than say the command with 0.5 second delay
-    engine.say('Hey Google')
-    engine.runAndWait()
-    time.sleep(0.6)
+    activate_ga()
+    time.sleep(1.5)
     # Giving the commend
     engine.say(step)
     engine.runAndWait()
-
 
 def filename_formater(date):
     y = date[:4]
@@ -80,7 +90,6 @@ def filename_formater(date):
     minute = date[14:16]
     s = date[17:19]
     return y + '_' + m + '_' + d + '_' + h + '_' + minute + '_' + s
-
 
 def capturing(tcid):
     cam = cv2.VideoCapture(0)
@@ -107,10 +116,12 @@ def capturing(tcid):
     cam.release()
     cv2.destroyAllWindows()
 
-def screenshot():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'screenshot.ps1'], stdout=sys.stdout)
-    p.communicate()
+# def screenshot(status):
+    # os.system('$ex = Test-Path C:\Screenshot -PathType Container')
+    # os.system('if($ex -ne 1) {mkdir C:\Screenshot}')
+    # os.system('adb shell screencap -p /sdcard/{}.png'.format(status))
+    # os.system('adb pull /sdcard/{}.png /Screenshot'.format(status))
+    # os.system('adb shell rm /sdcard/{}.png'.format(status))
 
 def push_noti(message):
     # load the key from the pushbullet_api_key.txt
@@ -119,29 +130,27 @@ def push_noti(message):
     dev = pb.get_device('Google Pixel 4a (5G)')
     dev.push_note('Automation Notification', message)
 
+def turn_on_wifi():
+    os.system('adb root')
+    os.system('adb shell "svc wifi enable"')
 
-def wifi_controller(online=True):
-    if online:
-        p = subprocess.Popen(  
-            ["powershell.exe", path+'enableWIFI.ps1'], stdout=sys.stdout)
-        p.communicate()
+def turn_off_wifi():
+    os.system('adb root')
+    os.system('adb shell "svc wifi disable"')
 
-    elif online is False:
-        p = subprocess.Popen(
-            ["powershell.exe", path+'disableWIFI.ps1'], stdout=sys.stdout)
-        p.communicate()
+# def sign_out():
+#     p = subprocess.Popen(
+#         ['powershell.exe', path+'SignOut.ps1'])
+#     p.communicate()
 
+# def sign_in():
+#     p = subprocess.Popen(
+#         ['powershell.exe', path+'SignIn.ps1'])
+#     p.communicate()
 
-
-def sign_out():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'SignOut.ps1'])
-    p.communicate()
-
-def sign_in():
-    p = subprocess.Popen(
-        ['powershell.exe', path+'SignIn.ps1'])
-    p.communicate()
+def reset():
+    os.system('adb shell input keyevent 3')
+    time.sleep(3)
 
 def match_slice(sentence, keywords):
     sen = sentence.lower()
@@ -151,17 +160,36 @@ def match_slice(sentence, keywords):
     return False
 
 def analysis(respond):
-    fail_keyword = ["offline", "can't do that", 'sorry', 'trouble', 'wrong', 'try again', "don't", "none"]
+    fail_keyword = ["offline", "can't do that", 'sorry',
+                    'trouble', 'wrong', 'try again', "don't", "none"]
     if match_slice(respond.lower(), fail_keyword):
         return False
     return True
 
+def system_check():
+    tts("hello")
+
+    time.sleep(5)
+
+    turn_off_wifi()
+
+    time.sleep(5)
+
+    turn_on_wifi()
+
+    time.sleep(5)
+
+    sign_in_google_account()
+
+    sign_out_google_account()
+
+    print('system check done')
 
 class Automation():
-    def __init__(self, input_file):
+    def __init__(self, input_file, sheet_name):
         self.input_file = str(input_file)
         # loading the test cases file
-        self.sheet = load_workbook(self.input_file).active
+        self.sheet = load_workbook(self.input_file)[sheet_name]
 
     def execute(self, sheet_name):
         # Generate the dictionary for the case
@@ -196,44 +224,44 @@ class Automation():
                     text = text[0]
                 else:
                     text = text[-2]
-                print('Commend: {}'.format(text))
+                print('    Commend: {}'.format(text))
 
                 # Generate the speech
-
                 tts(text)
-                # time.sleep(0.5)
+                time.sleep(1.5)
 
                 # Reciving Respond
                 respond = stt(r, mic)
-                print("Respond: {}".format(str(respond['transcription'])))
+                print("    Respond: {}".format(str(respond['transcription'])))
 
                 # Capturing the image if the computer captured the respond
                 if respond['transcription'] is not None:
-                    capturing(tcid)
-                    screenshot()
+                    # capturing(tcid)
+                    print('    respond get')
 
                 # If the computer cannot get the respond, it will execute the case again
                 else:
                     # Try to perform the test case again
-                    print('===> Try to perform the case again')
-                    time.sleep()
-                    # give it 5 sec to clear the previous condition and recalibrate the ambient noise threadhole
+                    print('    ===> Try to perform the case again')
+                    
+                    # clear the previous condition and recalibrate the ambient noise threadhole
+                    reset()
                     ambient_noise(r, mic)
 
                     tts(text)
 
                     # Reciving Respond
                     respond = stt(r, mic)
-                    print("    Respond: {}".format(
+                    print("     Respond: {}".format(
                         str(respond['transcription'])))
 
                     if respond['transcription'] is not None:
-                        capturing(tcid)
-                        screenshot()
+                        # capturing(tcid)
+                        print('respond get')
 
                     # Won't capture photo if the respond is still none
                     else:
-                        print('    Fail to perform the test case {}'.format(tcid))
+                        print('     Fail to perform the test case {}'.format(tcid))
                         error_time = str(datetime.now())[:-7]
                         error_msg = '{}\nFail to perform case {}/{}\nTCID: {}'.format(
                             error_time, num, case_amount, tcid)
@@ -244,71 +272,84 @@ class Automation():
                 if analysis(str(respond['transcription'])):
                     result.append("Pass")
                 out[sheet_name].append(result)
+                out.save(output_name)
                 print(respond)
                 print(
                     '====================================================================================')
                 time.sleep(3)
 
             except:
-                print('Something went wrong, skipping case: {}'.format(tcid))
+                print('    Something went wrong, skipping case: {}'.format(tcid))
                 push_noti('Error occured when executing case: {}'.format(tcid))
 
+if __name__ == '__main__':
+    # Create "auto_log.txt" for storing log
+    # sys.stdout = open('auto_log.txt', 'w')
 
-push_noti('Execution Started')
-# online_signin
-print('Executing Online/Sign In cases')
-push_noti('Executing online_in.xlsx')
-test_1 = Automation('online_in.xlsx')
-test_1.execute(sheet_titles[0])
-push_noti('Stage 1 finished!')
+    plan = 'W16_auto_case_Prrduction.xlsx'
 
-# disconnect WiFi
-print('***Disconnecting WiFi***')
-wifi_controller(False)
+    # push_noti('Execution Started')
+    # # online_signin
+    # print('Executing Online/Sign In cases')
+    # push_noti('Executing online_in.xlsx')
+    # test_1 = Automation(plan, 'Online_In')
+    # test_1.execute(sheet_titles[0])
+    # push_noti('Stage 1 finished!')
 
-# offline_signin
-print('Executing Offline/Sign In cases')
-push_noti('Executing offline_in.xlsx')
-test_2 = Automation('offline_in.xlsx')
-test_2.execute(sheet_titles[1])
-push_noti('Stage 2 finished!')
+    # # disconnect WiFi
+    # print('***Disconnecting WiFi***')
+    # turn_off_wifi()
+    # time.sleep(3)
+    # screenshot('offline_in')
 
-# connect WiFi
-print(' ')
-print('***Connecting WiFi***')
-wifi_controller(True)
-time.sleep(10)
+    # # offline_signin
+    # print('Executing Offline/Sign In cases')
+    # push_noti('Executing offline_in.xlsx')
+    # test_2 = Automation(plan, 'Offline_In')
+    # test_2.execute(sheet_titles[1])
+    # push_noti('Stage 2 finished!')
 
-# Sign out google account
-print('***Signing out google account***')
-sign_out()
-print(' ')
-print(' ')
+    # # connect WiFi
+    # print(' ')
+    # print('***Connecting WiFi***')
+    # turn_on_wifi()
+    # time.sleep(10)
 
-# online_signout
-print('Executing Online/Sign out cases')
-push_noti('Executing online_out.xlsx')
-test_3 = Automation('online_out.xlsx')
-test_3.execute(sheet_titles[2])
-push_noti('Stage 3 finished!')
+    # # Sign out google account
+    # print('***Signing out google account***')
+    # sign_out_google_account()
+    # print(' ')
+    # print(' ')
 
-# disconnect WiFi
-print(' ')
-print('***Disconnecting WiFi***')
-wifi_controller(False)
-print(' ')
-print(' ')
+    # time.sleep(3)
+    # screenshot('Online_out')
 
-# offline_signout
-print('Executing Offline/Sign out cases')
-push_noti('Executing ac_offline_out.xlsx')
-test_4 = Automation('offline_out.xlsx')
-test_4.execute(sheet_titles[3])
+    # online_signout
+    print('Executing Online/Sign out cases')
+    push_noti('Executing online_out.xlsx')
+    test_3 = Automation(plan, 'Online_Out')
+    test_3.execute(sheet_titles[2])
+    push_noti('Stage 3 finished!')
 
-push_noti('All test cases executed.')
-# Export the result
-print('Saving the file {}'.format(output_name))
-out.save(output_name)
+    # disconnect WiFi
+    print(' ')
+    print('***Disconnecting WiFi***')
+    turn_off_wifi()
+    print(' ')
+    print(' ')
 
+    time.sleep(3)
+    screenshot('Offline_out')
 
-    
+    # offline_signout
+    print('Executing Offline/Sign out cases')
+    push_noti('Executing ac_offline_out.xlsx')
+    test_4 = Automation(plan, 'Offline_Out')
+    test_4.execute(sheet_titles[3])
+
+    push_noti('All test cases executed.')
+    # Export the result
+    print('Saving the file {}'.format(output_name))
+    out.save(output_name)
+
+    # sys.stdout.close()
