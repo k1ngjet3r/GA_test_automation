@@ -2,22 +2,14 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 from datetime import datetime
 from datetime import date
-from pushbullet import Pushbullet
-from gtts import gTTS
-import speech_recognition as sr
-import subprocess
-import sys
-import cv2
-import pyttsx3
 import time
-import os
-import re
-import sys
 from func.sign_ctrl import sign_in_google_account, sign_out_google_account
 from func.screenshot import screenshot
-
-r = sr.Recognizer()
-mic = sr.Microphone(device_index=1)
+from func.tts import *
+from func.stt import *
+from func.ctrl import *
+from func.basic import *
+from func.push_notification import *
 
 today = str(date.today())
 exe_date = today[:4] + today[5:7] + today[8:]
@@ -29,58 +21,10 @@ sheet_titles = ['Online_In', 'Offline_In', 'Online_Out', 'Offline_Out']
 out = Workbook()
 out.active
 
-def activate_ga():
-    os.system('adb shell am start -n com.google.android.carassistant/com.google.android.apps.gsa.binaries.auto.app.voiceplate.VoicePlateActivity')
-
 for name in sheet_titles:
     out.create_sheet(name)
     out[name].append(
         ['TCID', 'Test Step', 'Time of Execution', 'GA_respond', 'Result'])
-
-def ambient_noise(recog, mic):
-    with mic as source:
-        print('Adjusting amnient noise...')
-        # Collect and adjust the ambient nosie threadhole
-        recog.adjust_for_ambient_noise(source, duration=5)
-
-def stt(recognizer, microphone):
-    with microphone as source:
-        # print('Adjusting ambient noise')
-        # recognizer.adjust_for_ambient_noise(source, duration = 1)
-
-        # Collecting the respond with 150 seconds of waiting time
-        print('    Collecting Respond...')
-        audio = recognizer.listen(source, timeout=200)
-
-    response = {'success': True, "error": None, "transcription": None}
-
-    try:
-        # set the recognize language to English and convert the speech to text
-        recog = recognizer.recognize_google(audio, language='en-UK')
-        response["transcription"] = recog
-
-    except sr.RequestError:
-        response['success'] = False
-        response['error'] = 'API unavailable'
-
-    except sr.UnknownValueError:
-        response['success'] = False
-        response['error'] = "Unable to recognitized the speech"
-
-    except:
-        response['success'] = False
-        response['error'] = 'No respond from Google Assistant'
-    return response
-
-def tts(step):
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 105)
-    # say "hey google" first and than say the command with 0.5 second delay
-    activate_ga()
-    time.sleep(1.5)
-    # Giving the commend
-    engine.say(step)
-    engine.runAndWait()
 
 def filename_formater(date):
     y = date[:4]
@@ -91,80 +35,6 @@ def filename_formater(date):
     s = date[17:19]
     return y + '_' + m + '_' + d + '_' + h + '_' + minute + '_' + s
 
-def capturing(tcid):
-    cam = cv2.VideoCapture(0)
-    cv2.namedWindow("test")
-    img_counter = 0
-
-    while True:
-        ret, frame = cam.read()
-
-        if not ret:
-            print("failed to grab frame")
-            break
-        cv2.imshow("test", frame)
-        cv2.waitKey(1)
-
-        if img_counter < 1:
-            img_name = "{}.png".format(tcid)
-            cv2.imwrite(img_name, frame)
-            print("{} written!".format(img_name))
-            img_counter += 1
-        else:
-            break
-
-    cam.release()
-    cv2.destroyAllWindows()
-
-# def screenshot(status):
-    # os.system('$ex = Test-Path C:\Screenshot -PathType Container')
-    # os.system('if($ex -ne 1) {mkdir C:\Screenshot}')
-    # os.system('adb shell screencap -p /sdcard/{}.png'.format(status))
-    # os.system('adb pull /sdcard/{}.png /Screenshot'.format(status))
-    # os.system('adb shell rm /sdcard/{}.png'.format(status))
-
-def push_noti(message):
-    # load the key from the pushbullet_api_key.txt
-    key = open('pushbullet_api_key.txt', 'r').read()
-    pb = Pushbullet(key)
-    dev = pb.get_device('Google Pixel 4a (5G)')
-    dev.push_note('Automation Notification', message)
-
-def turn_on_wifi():
-    os.system('adb root')
-    os.system('adb shell "svc wifi enable"')
-
-def turn_off_wifi():
-    os.system('adb root')
-    os.system('adb shell "svc wifi disable"')
-
-# def sign_out():
-#     p = subprocess.Popen(
-#         ['powershell.exe', path+'SignOut.ps1'])
-#     p.communicate()
-
-# def sign_in():
-#     p = subprocess.Popen(
-#         ['powershell.exe', path+'SignIn.ps1'])
-#     p.communicate()
-
-def reset():
-    os.system('adb shell input keyevent 3')
-    time.sleep(3)
-
-def match_slice(sentence, keywords):
-    sen = sentence.lower()
-    for key in keywords:
-        if re.search(key, sen):
-            return True
-    return False
-
-def analysis(respond):
-    fail_keyword = ["offline", "can't do that", 'sorry',
-                    'trouble', 'wrong', 'try again', "don't", "none"]
-    if match_slice(respond.lower(), fail_keyword):
-        return False
-    return True
 
 def system_check():
     tts("hello")

@@ -2,9 +2,6 @@ import os, subprocess, time
 
 path = 'C:\\control\\'
 
-def activate_ga():
-    os.system('adb shell am start -n com.google.android.carassistant/com.google.android.apps.gsa.binaries.auto.app.voiceplate.VoicePlateActivity')
-
 def screenshot(status):
     os.system('$ex = Test-Path C:\Screenshot -PathType Container')
     os.system('if($ex -ne 1) {mkdir C:\Screenshot}')
