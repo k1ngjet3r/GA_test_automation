@@ -1,4 +1,4 @@
-from pushbullet import pushbullet
+from pushbullet import Pushbullet
 
 def push_noti(message):
     # load the key from the pushbullet_api_key.txt

@@ -4,3 +4,5 @@ pushbullet_api_key.txt
 current.png
 *.txt
 json/google_account.json
+*.pyc
+*.pyc

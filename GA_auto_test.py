@@ -156,50 +156,50 @@ if __name__ == '__main__':
     # Create "auto_log.txt" for storing log
     # sys.stdout = open('auto_log.txt', 'w')
 
-    plan = 'W16_auto_case_Prrduction.xlsx'
+    plan = 'W16_auto_case_MAIN.xlsx'
 
     # push_noti('Execution Started')
-    # # online_signin
-    # print('Executing Online/Sign In cases')
+    # online_signin
+    print('Executing Online/Sign In cases')
     # push_noti('Executing online_in.xlsx')
-    # test_1 = Automation(plan, 'Online_In')
-    # test_1.execute(sheet_titles[0])
+    test_1 = Automation(plan, 'Online_In')
+    test_1.execute(sheet_titles[0])
     # push_noti('Stage 1 finished!')
 
-    # # disconnect WiFi
-    # print('***Disconnecting WiFi***')
-    # turn_off_wifi()
-    # time.sleep(3)
-    # screenshot('offline_in')
+    # disconnect WiFi
+    print('***Disconnecting WiFi***')
+    turn_off_wifi()
+    time.sleep(3)
+    screenshot('offline_in')
 
-    # # offline_signin
-    # print('Executing Offline/Sign In cases')
+    # offline_signin
+    print('Executing Offline/Sign In cases')
     # push_noti('Executing offline_in.xlsx')
-    # test_2 = Automation(plan, 'Offline_In')
-    # test_2.execute(sheet_titles[1])
+    test_2 = Automation(plan, 'Offline_In')
+    test_2.execute(sheet_titles[1])
     # push_noti('Stage 2 finished!')
 
-    # # connect WiFi
-    # print(' ')
-    # print('***Connecting WiFi***')
-    # turn_on_wifi()
-    # time.sleep(10)
+    # connect WiFi
+    print(' ')
+    print('***Connecting WiFi***')
+    turn_on_wifi()
+    time.sleep(10)
 
-    # # Sign out google account
-    # print('***Signing out google account***')
-    # sign_out_google_account()
-    # print(' ')
-    # print(' ')
+    # Sign out google account
+    print('***Signing out google account***')
+    sign_out_google_account()
+    print(' ')
+    print(' ')
 
-    # time.sleep(3)
-    # screenshot('Online_out')
+    time.sleep(3)
+    screenshot('Online_out')
 
     # online_signout
     print('Executing Online/Sign out cases')
-    push_noti('Executing online_out.xlsx')
+    # push_noti('Executing online_out.xlsx')
     test_3 = Automation(plan, 'Online_Out')
     test_3.execute(sheet_titles[2])
-    push_noti('Stage 3 finished!')
+    # push_noti('Stage 3 finished!')
 
     # disconnect WiFi
     print(' ')
@@ -213,11 +213,11 @@ if __name__ == '__main__':
 
     # offline_signout
     print('Executing Offline/Sign out cases')
-    push_noti('Executing ac_offline_out.xlsx')
+    # push_noti('Executing ac_offline_out.xlsx')
     test_4 = Automation(plan, 'Offline_Out')
     test_4.execute(sheet_titles[3])
 
-    push_noti('All test cases executed.')
+    # push_noti('All test cases executed.')
     # Export the result
     print('Saving the file {}'.format(output_name))
     out.save(output_name)
