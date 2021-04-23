@@ -132,7 +132,7 @@ class Automation():
         # determine the phone type
         if re.search('work', step) and re.search('the work', step) is False:
             test_command.append('work')
-        
+
         elif re.search('home', step):
             test_command.append('home')
 
@@ -149,7 +149,7 @@ class Automation():
         print("--> What's the msg?")
         print('   {}'.format(msg))
         tts(msg)
-        
+
         ga_msg_respond = stt(r, mic)
         result.append(ga_msg_respond)
         if re.search('change', ga_msg_respond):
@@ -180,7 +180,7 @@ class Automation():
 
         elif re.search('calling', phone_type_respond):
             self.calling(result)
-        
+
         else:
             print('Unrecognitized respond: {}'.format(phone_type_respond))
             result.append('Something went wrong')
@@ -231,10 +231,10 @@ class Automation():
         result.append(is_that_respond)
         if re.search('what', is_that_respond):
             self.whats_the_msg(msg, result)
-        
+
         elif re.search('calling', is_that_respond):
             self.calling(result)
-        
+
         else:
             print('Unrecognitized respond: {}'.format(is_that_respond))
             result.append('Something went wrong')
@@ -292,7 +292,8 @@ class Automation():
             result.append(respond)
 
             if re.search('sorry', respond):
-                self.who(test_command[1], test_command[2], test_command[3], result)
+                self.who(test_command[1], test_command[2],
+                         test_command[3], result)
 
             elif re.search('or mobile', respond):
                 self.phone_type(test_command[2], test_command[3], result)
@@ -310,7 +311,8 @@ class Automation():
                 result.append("Fail")
 
     def execute(self, sheet_name):
-        cases = {str(tcid): str(step) for tcid, step in self.sheet.iter_rows(max_col=2, values_only=True) if tcid is not None}
+        cases = {str(tcid): str(step) for tcid, step in self.sheet.iter_rows(
+            max_col=2, values_only=True) if tcid is not None}
 
         current_case = 1
         # Iterate the case and feed it to the main loop
@@ -333,15 +335,15 @@ class Automation():
 
             try:
                 self.sms_attempt(test_command, reset)
-            
+
             except TypeError:
                 result.append("something went wrong ")
-
 
             out[sheet_name].append(result)
             out.save('sms_result.xlsx')
 
 
-test = Automation('Android_online_in.xlsx')
+if __name__ == '__main__':
+    test = Automation('Android_online_in.xlsx')
 
-test.execute('Online_In')
+    test.execute('Online_In')
