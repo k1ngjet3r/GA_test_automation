@@ -35,15 +35,15 @@ def image_search(target_img, pattern, precision=0.8):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
         print('         Image matching rate: {}'.format(max_val))
-        
+
         if max_val < precision:
             return False
-        
+
         x, y = (max_loc[0]+x_offset, max_loc[1]+y_offset)
         # print(x, y)
 
         return x, y
-    
+
     except:
         print("[ImgNotFound] OpenCV couldn't find the image file in the given directory")
 
@@ -53,7 +53,7 @@ def tap_xy(x, y):
 
 def get_cur_screenshot():
     #get device's current screen shot and place it in img\temp folder
-    current_dir = os.getcwd() + '/img/temp'
+    current_dir = os.getcwd() + '/img/screenshot'
     current_dir.replace('\\', '/')
     # capture = subprocess.check_output(['adb', 'shell', 'screencap', '-p', '/sdcard/current.png']).splitlines()
     # move_file = subprocess.check_output(['adb', 'pill', '/sdcard/current.png', current_dir]).splitlines()
@@ -72,7 +72,7 @@ def find_and_tap(pattern):
         else:
             x, y = image_search(target_img, img_dir+pattern)
             tap_xy(x, y)
-            
+
 
     except TypeError:
         print('[ImgNotFound] Please check your setting or device connection')
