@@ -1,4 +1,5 @@
 import speech_recognition as sr
+from time import sleep
 
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
@@ -16,13 +17,13 @@ def stt(recognizer, microphone):
 
         # Collecting the respond with 150 seconds of waiting time
         print('    Collecting Respond...')
-        audio = recognizer.listen(source, timeout=200)
+        audio = recognizer.listen(source, timeout=2000)
 
     response = {'success': True, "error": None, "transcription": None}
 
     try:
         # set the recognize language to English and convert the speech to text
-        recog = recognizer.recognize_google(audio, language='en-UK')
+        recog = recognizer.recognize_google(audio, language='en-US')
         response["transcription"] = recog
 
     except sr.RequestError:
@@ -37,3 +38,19 @@ def stt(recognizer, microphone):
         response['success'] = False
         response['error'] = 'No respond from Google Assistant'
     return response
+
+if __name__ == '__main__':
+    print('Adjusting the ambient noise...')
+    ambient_noise(r, mic)
+    print('Recording in 5..')
+    sleep(1)
+    print('Recording in 4..')
+    sleep(1)
+    print('Recording in 3..')
+    sleep(1)
+    print('Recording in 2..')
+    sleep(1)
+    print('Recording in 1..')
+    sleep(1)
+    s = stt(r, mic)
+    print(s)
